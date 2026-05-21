@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/router";
 import { cn } from "~/lib/utils";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
@@ -15,7 +16,7 @@ type LoginFormValues = {
 
 export function LoginForm({ className, ...props }: React.ComponentProps<"div">) {
   const { signInUserWithEmailAndPasswordAsync } = useSignIn();
-
+  const router = useRouter();
   const { register, handleSubmit } = useForm<LoginFormValues>({
     defaultValues: {
       email: "",
@@ -29,6 +30,7 @@ export function LoginForm({ className, ...props }: React.ComponentProps<"div">) 
       email: values.email,
       password: values.password,
     });
+    router.replace("/dashboard");
   };
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
