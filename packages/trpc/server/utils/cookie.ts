@@ -23,7 +23,7 @@ export function createCookieFactory(res:Response){
 
 export function getCookieFactory(req: Request){
     return function getCookie(name: string){
-        req.cookies?.[name]
+        return req.cookies?.[name]
     }
 }
 

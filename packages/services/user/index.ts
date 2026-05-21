@@ -19,6 +19,28 @@ class UserService {
     return { token };
   }
 
+  private async verifyUserToken(token:string): Promise<GenerateUserTokenPayloadType>{
+   try {
+    const verificationResult = JWT.verify(token, env.JWT_SECRET) as GenerateUserTokenPayloadType
+    return verificationResult
+   } catch (error) {
+    throw new Error(`Invalid Token`)
+   }
+  }
+
+  private async getUserInfoByID(id:string){
+    const user = await db.select({
+      id: usersTable.id,
+      email: usersTable.email,
+      fullName: usersTable.fullName,
+      profileImageUrl: usersTable.profileImageUrl
+    }).from(usersTable).where(eq(usersTable.id, id))
+
+    if(!user || user.length === 0)throw new Error (`User with id = ${id} does not exist`)
+
+      return user[0]!
+}
+
   private async getUserByEmail(email: string) {
     const result = await db.select().from(usersTable).where(eq(usersTable.email, email));
     if (!result || result.length === 0) return null;
@@ -80,6 +102,12 @@ class UserService {
       id:existingUser.id,
       token,
     };
+  }
+
+  public async verifyAndDecodeUserToken(token:string){
+    const {id} = await this.verifyUserToken(token)
+    const userInfo = await this.getUserInfoByID(id)
+    return {...userInfo}
   }
 }
 

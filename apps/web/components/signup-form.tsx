@@ -5,7 +5,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/com
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "~/components/ui/field";
 import { Input } from "~/components/ui/input";
 import { useSignUp } from "~/hooks/api/auth";
-import { trpc } from "~/trpc/client";
 
 type SignupFormValues = {
   name: string;
