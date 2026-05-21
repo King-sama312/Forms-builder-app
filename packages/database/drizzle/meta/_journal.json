@@ -15,6 +15,13 @@
       "when": 1779374743190,
       "tag": "0001_polite_human_robot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779376204953,
+      "tag": "0002_nifty_shiva",
+      "breakpoints": true
     }
   ]
 }

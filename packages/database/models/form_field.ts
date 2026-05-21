@@ -15,7 +15,7 @@ export const formFieldsTable = pgTable("form_fileds", {
 
   isRequired: boolean("is_required").default(false).notNull(),
 
-  index: numeric("indexx", { scale: 2 }).notNull(),
+  index: numeric("index", { scale: 2 }).notNull(),
 
   type: fieldTypeEnum("type").notNull(),
   

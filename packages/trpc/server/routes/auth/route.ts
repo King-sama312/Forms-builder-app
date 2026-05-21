@@ -1,5 +1,5 @@
 import { userService } from "../../services";
-import { publicProcedure, router } from "../../trpc";
+import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
 import { getAuthenticationCookie, setAuthenticationCookie } from "../../utils/cookie";
 import { generatePath } from "../../utils/path-generator";
 import {
@@ -33,34 +33,45 @@ export const authRouter = router({
         email,
         password,
       });
-      
-      setAuthenticationCookie(ctx, token)
-      
+
+      setAuthenticationCookie(ctx, token);
+
       return { id };
     }),
 
-    signInUserWithEmailAndPassword:publicProcedure.meta({openapi:{
-       method: "POST",
+  signInUserWithEmailAndPassword: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
         path: getPath("/signInUserWithEmailAndPassword"),
         tags: TAGS,
-    }}).input(signInUserWithEmailAndPasswordInputModel).output(signInUserWithEmailAndPasswordOutputModel).mutation(async({input,ctx})=>{
-      const {email,password} = input
-      const {id,token} = await userService.signInUserWithEmailAndPassword({email, password})
+      },
+    })
+    .input(signInUserWithEmailAndPasswordInputModel)
+    .output(signInUserWithEmailAndPasswordOutputModel)
+    .mutation(async ({ input, ctx }) => {
+      const { email, password } = input;
+      const { id, token } = await userService.signInUserWithEmailAndPassword({ email, password });
 
-      setAuthenticationCookie(ctx, token)
+      setAuthenticationCookie(ctx, token);
 
-      return {id}
+      return { id };
     }),
 
-    getLoggedInUserInfo:publicProcedure.meta({openapi:{
-      method: "GET",
-      path:"/getLoggedInUserInfo",
-      tags: TAGS
-    }}).input(getLoggedInUserInfoInputModel).output(getLoggedInUserInfoOutputModel).query(async({ctx})=>{
-     const userToken = getAuthenticationCookie(ctx)  
-     if(!userToken) throw new Error(`User is not logged in`)
-      const {email,fullName,id,profileImageUrl} = await userService.verifyAndDecodeUserToken(userToken)
-
-     return {id, email, fullName, profileImageUrl}
+  getLoggedInUserInfo: authenticatedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/getLoggedInUserInfo",
+        tags: TAGS,
+      },
     })
+    .input(getLoggedInUserInfoInputModel)
+    .output(getLoggedInUserInfoOutputModel)
+    .query(async ({ ctx }) => {
+     
+     const {email,fullName,id,profileImageUrl}=   await userService.getUserInfoByID(ctx.user.id);
+
+      return { id, email, fullName, profileImageUrl };
+    }),
 });

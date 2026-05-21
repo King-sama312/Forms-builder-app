@@ -28,7 +28,7 @@ class UserService {
    }
   }
 
-  private async getUserInfoByID(id:string){
+  public async getUserInfoByID(id:string){
     const user = await db.select({
       id: usersTable.id,
       email: usersTable.email,
@@ -67,7 +67,7 @@ class UserService {
     //Create user in DB
     const userInsertResult = await db
       .insert(usersTable)
-      .values({ fullName, email, password: hash })
+      .values({ fullName, email, password: hash, salt })
       .returning({ id: usersTable.id });
 
     if (!userInsertResult || userInsertResult.length === 0 || !userInsertResult[0]?.id)
@@ -106,8 +106,7 @@ class UserService {
 
   public async verifyAndDecodeUserToken(token:string){
     const {id} = await this.verifyUserToken(token)
-    const userInfo = await this.getUserInfoByID(id)
-    return {...userInfo}
+     return {id}
   }
 }
 
