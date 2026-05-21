@@ -1,16 +1,18 @@
 import { authenticatedProcedure, router } from "../../trpc";
 import { formService } from "../../services";
+import { generatePath } from "../../utils/path-generator";
 import { createFormInputModel, createFormOutputModel } from "./model";
 
 const TAGS = ["Form"];
-
+const getPath = generatePath("/form")
 export const formRouter = router({
   createForm: authenticatedProcedure
     .meta({
       openapi: {
         method: "POST",
-        path: "/createForm",
+        path: getPath("/createForm"),
         tags: TAGS,
+        protect: true
       },
     })
     .input(createFormInputModel)
