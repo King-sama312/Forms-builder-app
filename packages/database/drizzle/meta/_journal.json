@@ -8,6 +8,13 @@
       "when": 1779204961600,
       "tag": "0000_lonely_multiple_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1779374743190,
+      "tag": "0001_polite_human_robot",
+      "breakpoints": true
     }
   ]
 }
