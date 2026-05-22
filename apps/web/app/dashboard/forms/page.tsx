@@ -1,3 +1,5 @@
+import { CreateFormDialog } from "./_components/create-form-dialog"
+
 export default function DashboardFormsPage() {
   return (
     <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
@@ -10,11 +12,14 @@ export default function DashboardFormsPage() {
             </p>
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            <div className="rounded-2xl border border-border bg-background p-4">
-              <h2 className="text-lg font-semibold">Create a new form</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Start a blank form or use a template to collect responses.
-              </p>
+            <div className="flex flex-col justify-between rounded-2xl border border-border bg-background p-4">
+              <div>
+                <h2 className="text-lg font-semibold">Create a new form</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Start a blank form or use a template to collect responses.
+                </p>
+              </div>
+              <CreateFormDialog />
             </div>
             <div className="rounded-2xl border border-border bg-background p-4">
               <h2 className="text-lg font-semibold">Published forms</h2>
