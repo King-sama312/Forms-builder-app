@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
-import { useGetFormById } from "~/hooks/api/form";
+import { useGetFormById, useCreateFormSubmission } from "~/hooks/api/form";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { Label } from "~/components/ui/label";
@@ -28,8 +28,8 @@ type FieldType = "TEXT" | "NUMBER" | "EMAIL" | "YES_NO" | "PASSWORD";
 export default function PublicFormPage() {
   const { form_id } = useParams<{ form_id: string }>();
   const { form, isLoading, isError } = useGetFormById(form_id);
+  const { createFormSubmissionAsync, isSuccess: isSubmitted, isPending: isSubmitting } = useCreateFormSubmission();
   const [values, setValues] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
 
   if (isLoading) {
     return (
@@ -54,7 +54,7 @@ export default function PublicFormPage() {
     );
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const missing = form.fields
@@ -66,16 +66,24 @@ export default function PublicFormPage() {
       return;
     }
 
-    setSubmitted(true);
-    toast.success("Form submitted");
-    console.log("Form values:", values);
+    try {
+      await createFormSubmissionAsync({
+        formId: form_id,
+        values: form.fields
+          .filter((f) => values[f.id]?.trim())
+          .map((f) => ({ formFieldId: f.id, value: values[f.id]! })),
+      });
+      toast.success("Form submitted");
+    } catch {
+      toast.error("Failed to submit form");
+    }
   };
 
   const setValue = (fieldId: string, value: string) => {
     setValues((prev) => ({ ...prev, [fieldId]: value }));
   };
 
-  if (submitted) {
+  if (isSubmitted) {
     return (
       <div className="flex min-h-svh items-center justify-center p-6">
         <Card className="w-full max-w-lg">
@@ -136,8 +144,12 @@ export default function PublicFormPage() {
                 )}
               </div>
             ))}
-            <Button type="submit" className="self-start mt-2">
-              Submit
+            <Button type="submit" className="self-start mt-2" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <><Loader2 className="size-4 animate-spin" /> Submitting...</>
+              ) : (
+                "Submit"
+              )}
             </Button>
           </form>
         </CardContent>

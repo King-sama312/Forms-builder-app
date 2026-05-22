@@ -1,5 +1,5 @@
 import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
-import { formService, formFieldService } from "../../services";
+import { formService, formFieldService, formSubmissionService } from "../../services";
 import { generatePath } from "../../utils/path-generator";
 import {
   createFormInputModel,
@@ -14,6 +14,10 @@ import {
   getFormFieldsOutputModel,
   getFormByIdInputModel,
   getFormByIdOutputModel,
+  createFormSubmissionInputModel,
+  createFormSubmissionOutputModel,
+  getFormSubmissionsInputModel,
+  getFormSubmissionsOutputModel,
 } from "./model";
 
 const TAGS = ["Form"];
@@ -104,7 +108,29 @@ export const formRouter = router({
       return result;
     }),
 
-  getFormFields: authenticatedProcedure 
+  createFormSubmission: publicProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/createFormSubmission"), tags: TAGS },
+    })
+    .input(createFormSubmissionInputModel)
+    .output(createFormSubmissionOutputModel)
+    .mutation(async ({ input }) => {
+      const result = await formSubmissionService.createSubmission(input);
+      return result;
+    }),
+
+  getFormSubmissions: authenticatedProcedure
+    .meta({
+      openapi: { method: "GET", path: getPath("/getFormSubmissions"), tags: TAGS, protect: true },
+    })
+    .input(getFormSubmissionsInputModel)
+    .output(getFormSubmissionsOutputModel)
+    .query(async ({ input }) => {
+      const result = await formSubmissionService.getSubmissions(input);
+      return result;
+    }),
+
+  getFormFields: authenticatedProcedure
     .meta({
       openapi: { method: "GET", path: getPath("/getFormFields"), tags: TAGS, protect: true },
     })

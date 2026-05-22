@@ -111,6 +111,35 @@ export const useGetFormById = (formId: string) => {
   return { form, isError, isFetched, isFetching, isLoading, status };
 };
 
+export const useCreateFormSubmission = () => {
+  const {
+    mutateAsync: createFormSubmissionAsync,
+    mutate: createFormSubmission,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isPending,
+    isSuccess,
+    status,
+  } = trpc.form.createFormSubmission.useMutation();
+
+  return { createFormSubmissionAsync, createFormSubmission, error, failureCount, isError, isIdle, isPending, isSuccess, status };
+};
+
+export const useGetFormSubmissions = (formId: string) => {
+  const {
+    data: submissions,
+    isError,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.getFormSubmissions.useQuery({ formId });
+
+  return { submissions, isError, isFetched, isFetching, isLoading, status };
+};
+
 export const useDeleteFormField = (formId: string) => {
   const utils = trpc.useUtils();
 
