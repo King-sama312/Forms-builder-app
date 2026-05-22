@@ -98,6 +98,19 @@ export const useUpdateFormField = (formId: string) => {
   return { updateFormFieldAsync, updateFormField, error, failureCount, isError, isIdle, isSuccess, status };
 };
 
+export const useGetFormById = (formId: string) => {
+  const {
+    data: form,
+    isError,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.getFormById.useQuery({ formId });
+
+  return { form, isError, isFetched, isFetching, isLoading, status };
+};
+
 export const useDeleteFormField = (formId: string) => {
   const utils = trpc.useUtils();
 
