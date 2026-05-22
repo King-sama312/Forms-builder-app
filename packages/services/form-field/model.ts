@@ -20,7 +20,7 @@ export const updateFormFieldInput = z.object({
   label: z.string().max(100).optional(),
   description: z.string().optional(),
   placeholeder: z.string().optional(),
-  isRequired: z.boolean().optional(),
+  isRequired: z.boolean().optional().default(false),
   index: z.string().optional(),
 });
 

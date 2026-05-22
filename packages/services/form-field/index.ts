@@ -29,11 +29,12 @@ class FormFieldService {
       })
       .returning({ id: formFieldsTable.id });
 
-    if (!insertResult || insertResult.length === 0 || !insertResult[0]?.id) {
+    const result = insertResult[0];
+    if (!result || !result.id) {
       throw new Error(`Something went wrong while creating form field`);
     }
 
-    return insertResult[0];
+    return result;
   }
 
   public async updateField(payload: UpdateFormFieldInputType) {
@@ -49,11 +50,12 @@ class FormFieldService {
       .where(eq(formFieldsTable.id, fieldId))
       .returning({ id: formFieldsTable.id });
 
-    if (!updateResult || updateResult.length === 0) {
+    const result = updateResult[0];
+    if (!result) {
       throw new Error(`Form field with id ${fieldId} not found or update failed`);
     }
 
-    return updateResult[0];
+    return result;
   }
 
   public async deleteField(payload: DeleteFormFieldInputType) {
@@ -64,11 +66,12 @@ class FormFieldService {
       .where(eq(formFieldsTable.id, fieldId))
       .returning({ id: formFieldsTable.id });
 
-    if (!deleteResult || deleteResult.length === 0) {
+    const result = deleteResult[0];
+    if (!result) {
       throw new Error(`Form field with id ${fieldId} not found or delete failed`);
     }
 
-    return deleteResult[0];
+    return result;
   }
 
   public async getFields(payload: GetFormFieldsInputType) {

@@ -1,10 +1,21 @@
 import { authenticatedProcedure, router } from "../../trpc";
-import { formService } from "../../services";
+import { formService, formFieldService } from "../../services";
 import { generatePath } from "../../utils/path-generator";
-import { createFormInputModel, createFormOutputModel, listFormsInputModel, listFormsOutputModel } from "./model";
+import {
+  createFormInputModel,
+  createFormOutputModel,
+  listFormsInputModel,
+  listFormsOutputModel,
+  createFormFieldInputModel,
+  updateFormFieldInputModel,
+  deleteFormFieldInputModel,
+  getFormFieldsInputModel,
+  formFieldActionOutputModel,
+  getFormFieldsOutputModel,
+} from "./model";
 
 const TAGS = ["Form"];
-const getPath = generatePath("/form")
+const getPath = generatePath("/form");
 export const formRouter = router({
   createForm: authenticatedProcedure
     .meta({
@@ -12,7 +23,7 @@ export const formRouter = router({
         method: "POST",
         path: getPath("/createForm"),
         tags: TAGS,
-        protect: true
+        protect: true,
       },
     })
     .input(createFormInputModel)
@@ -45,5 +56,49 @@ export const formRouter = router({
     .query(async ({ ctx }) => {
       const forms = await formService.listFormsByUserId({ userId: ctx.user.id });
       return forms;
+    }),
+
+  createFormField: authenticatedProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/createFormField"), tags: TAGS, protect: true },
+    })
+    .input(createFormFieldInputModel)
+    .output(formFieldActionOutputModel)
+    .mutation(async ({ input }) => {
+      const result = await formFieldService.createField(input);
+      return result;
+    }),
+
+  updateFormField: authenticatedProcedure
+    .meta({
+      openapi: { method: "PATCH", path: getPath("/updateFormField"), tags: TAGS, protect: true },
+    })
+    .input(updateFormFieldInputModel)
+    .output(formFieldActionOutputModel)
+    .mutation(async ({ input }) => {
+      const result = await formFieldService.updateField(input);
+      return result;
+    }),
+
+  deleteFormField: authenticatedProcedure
+    .meta({
+      openapi: { method: "DELETE", path: getPath("/deleteFormField"), tags: TAGS, protect: true },
+    })
+    .input(deleteFormFieldInputModel)
+    .output(formFieldActionOutputModel)
+    .mutation(async ({ input }) => {
+      const result = await formFieldService.deleteField(input);
+      return result;
+    }),
+
+  getFormFields: authenticatedProcedure
+    .meta({
+      openapi: { method: "GET", path: getPath("/getFormFields"), tags: TAGS, protect: true },
+    })
+    .input(getFormFieldsInputModel)
+    .output(getFormFieldsOutputModel)
+    .query(async ({ input }) => {
+      const result = await formFieldService.getFields(input);
+      return result;
     }),
 });
