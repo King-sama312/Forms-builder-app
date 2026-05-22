@@ -58,6 +58,34 @@ export const formFieldActionOutputModel = z.object({
   id: z.string().uuid().describe("ID of the form field"),
 });
 
+export const getFormByIdInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+});
+
+export const getFormByIdOutputModel = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  description: z.string().nullable().optional(),
+  createdBy: z.string().uuid().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  fields: z.array(
+    z.object({
+      id: z.string().uuid(),
+      formId: z.string().uuid().nullable().optional(),
+      label: z.string(),
+      labelKey: z.string(),
+      description: z.string().nullable().optional(),
+      placeholeder: z.string().nullable().optional(),
+      isRequired: z.boolean(),
+      index: z.string(),
+      type: fieldTypeEnumSchema,
+      createdAt: z.date().nullable().optional(),
+      updatedAt: z.date().nullable().optional(),
+    })
+  ),
+});
+
 export const getFormFieldsOutputModel = z.array(
   z.object({
     id: z.string().uuid(),
