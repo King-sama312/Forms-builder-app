@@ -1,4 +1,6 @@
 import { CreateFormDialog } from "./_components/create-form-dialog"
+import { FormList } from "./_components/form-list"
+
 
 export default function DashboardFormsPage() {
   return (
@@ -35,6 +37,7 @@ export default function DashboardFormsPage() {
             </div>
           </div>
         </div>
+        <FormList />
       </div>
     </div>
   )
