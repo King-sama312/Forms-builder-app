@@ -6,7 +6,7 @@ import { StartMenu } from './start-menu';
 import { useGetUserInfo } from '~/hooks/api/auth/index';
 import { useWindows } from '~/components/windows-context';
 
-export function Taskbar() {
+export function Taskbar({ onShutdown }: { onShutdown?: () => void }) {
   const router = useRouter();
   const currentPathname = usePathname();
   const [startOpen, setStartOpen] = useState(false);
@@ -103,7 +103,7 @@ export function Taskbar() {
         </div>
       </div>
 
-      {startOpen && <StartMenu onClose={() => setStartOpen(false)} />}
+      {startOpen && <StartMenu onClose={() => setStartOpen(false)} onShutdown={onShutdown} />}
     </>
   );
 }

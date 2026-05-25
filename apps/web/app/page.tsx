@@ -1,28 +1,16 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { BootScreen } from '~/components/boot-screen';
-import { useGetUserInfo } from '~/hooks/api/auth/index';
-
-const STORAGE_KEY = 'win98-booted';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function HomePage() {
-  const { isLoading } = useGetUserInfo();
-  const [booted, setBooted] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem(STORAGE_KEY) === 'true';
+  const router = useRouter();
+
+  useEffect(() => {
+    if (sessionStorage.getItem('win98-booted') !== 'true') {
+      router.replace('/startup');
     }
-    return false;
-  });
+  }, [router]);
 
-  const handleBootComplete = useCallback(() => {
-    sessionStorage.setItem(STORAGE_KEY, 'true');
-    setBooted(true);
-  }, []);
-
-  if (!booted) return <BootScreen onBootComplete={handleBootComplete} />;
-  if (isLoading) return null;
-
-  // Desktop only — no welcome window
   return null;
 }

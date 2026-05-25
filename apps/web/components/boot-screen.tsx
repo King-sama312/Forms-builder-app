@@ -1,15 +1,39 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 interface BootScreenProps {
   onBootComplete: () => void;
+  clickToStart?: boolean;
 }
 
-export function BootScreen({ onBootComplete }: BootScreenProps) {
+export function BootScreen({ onBootComplete, clickToStart }: BootScreenProps) {
+  const [started, setStarted] = useState(!clickToStart);
   const [progress, setProgress] = useState(0);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const startedRef = useRef(!clickToStart);
+
+  const playAudio = useCallback(() => {
+    try {
+      const audio = new Audio('/win98-startup.mp3');
+      audio.volume = 0.5;
+      audio.play().catch(() => {});
+      audioRef.current = audio;
+    } catch {}
+  }, []);
+
+  const handleClick = useCallback(() => {
+    if (startedRef.current) return;
+    startedRef.current = true;
+    setStarted(true);
+  }, []);
 
   useEffect(() => {
+    if (!started) return;
+
+    playAudio();
+
     const duration = 5000;
     const interval = 50;
     const steps = duration / interval;
@@ -24,8 +48,12 @@ export function BootScreen({ onBootComplete }: BootScreenProps) {
       }
     }, interval);
 
-    return () => clearInterval(id);
-  }, []);
+    return () => {
+      clearInterval(id);
+      audioRef.current?.pause();
+      audioRef.current = null;
+    };
+  }, [started, playAudio]);
 
   useEffect(() => {
     if (progress >= 100) {
@@ -36,45 +64,45 @@ export function BootScreen({ onBootComplete }: BootScreenProps) {
 
   return (
     <div
+      onClick={clickToStart ? handleClick : undefined}
       style={{
         position: 'fixed',
         top: 0,
         left: 0,
         right: 0,
         bottom: 0,
-        zIndex: 9999,
+        zIndex: 10000,
         backgroundColor: '#000080',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
+        cursor: clickToStart && !started ? 'pointer' : 'default',
       }}
     >
       <div style={{ textAlign: 'center', marginBottom: '6rem' }}>
+        <Image
+          src="/windows-98-microsoft-icon.png"
+          alt="Windows 98"
+          width={200}
+          height={200}
+          priority
+          unoptimized
+        />
+      </div>
+
+      {clickToStart && !started && (
         <div
           style={{
             color: 'white',
-            fontSize: '3rem',
-            fontWeight: 700,
+            fontSize: '1rem',
             fontFamily: "'Times New Roman', serif",
-            fontStyle: 'italic',
-            letterSpacing: '0.025em',
-            marginBottom: '0.25rem',
+            animation: 'pulse 1.5s ease-in-out infinite',
           }}
         >
-          Windows 98
+          Click anywhere to start Windows 98
         </div>
-        <div
-          style={{
-            color: '#d1d5db',
-            fontSize: '0.875rem',
-            fontFamily: "'Times New Roman', serif",
-            letterSpacing: '0.1em',
-          }}
-        >
-          Microsoft
-        </div>
-      </div>
+      )}
 
       <div
         style={{
@@ -110,7 +138,7 @@ export function BootScreen({ onBootComplete }: BootScreenProps) {
             fontFamily: "'Times New Roman', serif",
           }}
         >
-          Starting Windows 98...
+          {started ? 'Starting Windows 98...' : 'Ready'}
         </div>
       </div>
     </div>

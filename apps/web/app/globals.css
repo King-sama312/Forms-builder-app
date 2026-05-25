@@ -64,3 +64,8 @@ html, body {
   box-shadow: inset 1px 1px #404040, inset -1px -1px #dfdfdf !important;
   background: #d4d0c8 !important;
 }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}

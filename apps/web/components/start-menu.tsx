@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useGetUserInfo, useSignOut } from '~/hooks/api/auth/index';
 
-export function StartMenu({ onClose }: { onClose: () => void }) {
+export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShutdown?: () => void }) {
   const router = useRouter();
   const { user } = useGetUserInfo();
   const { signOut } = useSignOut();
@@ -60,7 +60,7 @@ export function StartMenu({ onClose }: { onClose: () => void }) {
             </MenuItem>
           )}
           <div className="border-t border-[#808080] my-1 mx-2" />
-          <MenuItem onClick={() => handleClick('/')}>
+          <MenuItem onClick={() => { onShutdown?.(); onClose(); }}>
             <span className="w-6 h-6 inline-flex items-center justify-center mr-2">🖥️</span>
             Shut Down
           </MenuItem>
