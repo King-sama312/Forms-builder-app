@@ -5,6 +5,7 @@ import { createContext, useContext, useState, useCallback, ReactNode } from 'rea
 interface WindowInfo {
   id: string;
   title: string;
+  pathname: string;
   minimized: boolean;
 }
 
@@ -13,7 +14,7 @@ interface WindowsContextType {
   minimizeWindow: (id: string) => void;
   restoreWindow: (id: string) => void;
   isMinimized: (id: string) => boolean;
-  registerWindow: (id: string, title: string) => void;
+  registerWindow: (id: string, title: string, pathname: string) => void;
   unregisterWindow: (id: string) => void;
 }
 
@@ -44,10 +45,13 @@ export function WindowsProvider({ children }: { children: ReactNode }) {
     return windows.some(w => w.id === id && w.minimized);
   }, [windows]);
 
-  const registerWindow = useCallback((id: string, title: string) => {
+  const registerWindow = useCallback((id: string, title: string, pathname: string) => {
     setWindows(prev => {
-      if (prev.some(w => w.id === id)) return prev;
-      return [...prev, { id, title, minimized: false }];
+      const existing = prev.findIndex(w => w.pathname === pathname);
+      if (existing !== -1) {
+        return prev.map((w, i) => i === existing ? { ...w, id, title, minimized: false } : w);
+      }
+      return [...prev, { id, title, pathname, minimized: false }];
     });
   }, []);
 

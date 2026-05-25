@@ -1,7 +1,7 @@
 'use client';
 
 import { Rnd } from 'react-rnd';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { useWindows } from '~/components/windows-context';
 
@@ -23,6 +23,7 @@ export function Win98Window({
   noClose = false,
 }: Win98WindowProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { minimizeWindow, isMinimized, registerWindow, unregisterWindow } = useWindows();
   const windowIdRef = useRef<string>(Math.random().toString(36).substr(2, 9));
 
@@ -32,20 +33,18 @@ export function Win98Window({
   const prevRef = useRef({ x: defaultPosition.x, y: defaultPosition.y, width: defaultPosition.width, height: defaultPosition.height });
 
   useEffect(() => {
-    registerWindow(windowIdRef.current, title);
-    return () => {
-      unregisterWindow(windowIdRef.current);
-    };
-    // register/unregister are stable (useCallback), so only title changes matter
-  }, [title]);
+    registerWindow(windowIdRef.current, title, pathname);
+    // No cleanup — windows persist in the taskbar until explicitly closed
+  }, [title, pathname]);
 
   const handleClose = useCallback(() => {
+    unregisterWindow(windowIdRef.current);
     if (onClose) {
       onClose();
     } else {
       router.push('/');
     }
-  }, [onClose, router]);
+  }, [onClose, router, unregisterWindow]);
 
   const handleMinimize = useCallback(() => {
     minimizeWindow(windowIdRef.current);

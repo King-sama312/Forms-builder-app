@@ -1,17 +1,24 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { StartMenu } from './start-menu';
 import { useGetUserInfo } from '~/hooks/api/auth/index';
 import { useWindows } from '~/components/windows-context';
 
 export function Taskbar() {
+  const router = useRouter();
+  const currentPathname = usePathname();
   const [startOpen, setStartOpen] = useState(false);
   const { user } = useGetUserInfo();
   const { windows, restoreWindow } = useWindows();
 
-  const activeWindows = windows.filter(w => !w.minimized);
-  const minimizedWindows = windows.filter(w => w.minimized);
+  const handleWindowClick = (id: string, pathname: string, minimized: boolean) => {
+    if (minimized) {
+      restoreWindow(id);
+    }
+    router.push(pathname);
+  };
 
   return (
     <>
@@ -63,11 +70,12 @@ export function Taskbar() {
             minWidth: 0,
           }}
         >
-          {activeWindows.map(w => (
-            <TaskbarItem key={w.id} active>{w.title}</TaskbarItem>
-          ))}
-          {minimizedWindows.map(w => (
-            <TaskbarItem key={w.id} active={false} onClick={() => restoreWindow(w.id)}>
+          {windows.map(w => (
+            <TaskbarItem
+              key={w.id}
+              active={w.pathname === currentPathname && !w.minimized}
+              onClick={() => handleWindowClick(w.id, w.pathname, w.minimized)}
+            >
               {w.title}
             </TaskbarItem>
           ))}
@@ -88,7 +96,7 @@ export function Taskbar() {
         >
           {user && (
             <span style={{ maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {user.email ?? user.fullName ?? 'User'}
+              {user.fullName ?? 'User'}
             </span>
           )}
           <Clock />
@@ -124,7 +132,7 @@ function TaskbarItem({
         overflow: 'hidden',
         textOverflow: 'ellipsis',
         whiteSpace: 'nowrap',
-        cursor: onClick ? 'pointer' : 'default',
+        cursor: 'pointer',
         userSelect: 'none',
         flexShrink: 0,
       }}
