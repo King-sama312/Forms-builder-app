@@ -13,53 +13,48 @@ function formatTime(s: number): string {
   return `${m}:${sec.toString().padStart(2, '0')}`;
 }
 
+const svgStyle: React.CSSProperties = { width: 14, height: 14, fill: '#000', display: 'block' };
+
 function PlayIcon() {
   return (
-    <svg viewBox="0 0 10 10" width="10" height="10">
-      <polygon points="1,0 9,5 1,10" fill="currentColor" />
+    <svg viewBox="0 0 16 16" style={svgStyle}>
+      <polygon points="4,2 14,8 4,14" />
     </svg>
   );
 }
 function PauseIcon() {
   return (
-    <svg viewBox="0 0 10 10" width="10" height="10">
-      <rect x="1" y="0" width="3" height="10" fill="currentColor" />
-      <rect x="6" y="0" width="3" height="10" fill="currentColor" />
+    <svg viewBox="0 0 16 16" style={svgStyle}>
+      <rect x="3" y="2" width="4" height="12" rx="1" />
+      <rect x="9" y="2" width="4" height="12" rx="1" />
     </svg>
   );
 }
 function StopIcon() {
   return (
-    <svg viewBox="0 0 10 10" width="10" height="10">
-      <rect x="1" y="1" width="8" height="8" fill="currentColor" />
+    <svg viewBox="0 0 16 16" style={svgStyle}>
+      <rect x="2" y="2" width="12" height="12" rx="1" />
     </svg>
   );
 }
 function PrevIcon() {
   return (
-    <svg viewBox="0 0 12 10" width="12" height="10">
-      <polygon points="0,5 6,0 6,5 12,0 12,10 6,5 6,10" fill="currentColor" />
+    <svg viewBox="0 0 16 16" style={svgStyle}>
+      <polygon points="2,2 10,8 2,14" />
+      <rect x="11" y="2" width="3" height="12" rx="1" />
     </svg>
   );
 }
 function NextIcon() {
   return (
-    <svg viewBox="0 0 12 10" width="12" height="10">
-      <polygon points="0,0 6,5 6,0 12,5 12,10 6,5 6,10 0,10" fill="currentColor" />
+    <svg viewBox="0 0 16 16" style={svgStyle}>
+      <polygon points="14,2 6,8 14,14" />
+      <rect x="2" y="2" width="3" height="12" rx="1" />
     </svg>
   );
 }
-
 function VolumeIcon({ level }: { level: number }) {
-  return (
-    <svg viewBox="0 0 16 14" width="16" height="14">
-      <rect x="1" y="5" width="3" height="4" fill="currentColor" />
-      <polygon points="4,4 8,1 8,13 4,10" fill="currentColor" />
-      {level > 0 && <rect x="9" y="4" width="2" height="6" fill="currentColor" opacity={level > 0.3 ? 1 : 0.4} />}
-      {level > 0.3 && <rect x="12" y="2" width="2" height="10" fill="currentColor" opacity={level > 0.6 ? 1 : 0.4} />}
-      {level > 0.6 && <rect x="15" y="0" width="2" height="14" fill="currentColor" opacity={1} />}
-    </svg>
-  );
+  return <img src="/icons/MediaAudio_16x16_4.png" alt="Volume" style={{ width: 16, height: 16, imageRendering: 'pixelated', opacity: level > 0 ? 1 : 0.4 }} />;
 }
 
 const btnStyle: React.CSSProperties = {
@@ -232,8 +227,14 @@ export function MusicPlayer() {
                 userSelect: 'none',
               }}
             >
-              <span style={{ fontSize: 10, opacity: 0.6 }}>
-                {isCurrent && playing ? '▶' : isCurrent ? '⏸' : '🎵'}
+              <span style={{ display: 'inline-flex', alignItems: 'center', opacity: 0.8 }}>
+                {isCurrent && playing ? (
+                  <svg viewBox="0 0 16 16" style={{ width: 12, height: 12, fill: '#fff', display: 'block' }}>
+                    <polygon points="4,2 12,8 4,14" />
+                  </svg>
+                ) : (
+                  <img src="/icons/CdMusic_16x16_4.png" alt="" style={{ width: 12, height: 12, imageRendering: 'pixelated' }} />
+                )}
               </span>
               <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {song.name}

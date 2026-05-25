@@ -98,15 +98,13 @@ export function Win98Window({
             {title}
           </div>
           <div className="title-bar-controls">
-            <button aria-label="Minimize" onClick={handleMinimize}>_</button>
+            <button aria-label="Minimize" onClick={handleMinimize} />
             <button
               aria-label={isMaximized ? 'Restore' : 'Maximize'}
               onClick={handleMaximize}
-            >
-              {isMaximized ? '❐' : '□'}
-            </button>
+            />
             {!noClose && (
-              <button aria-label="Close" onClick={handleClose}>×</button>
+              <button aria-label="Close" onClick={handleClose} />
             )}
           </div>
         </div>

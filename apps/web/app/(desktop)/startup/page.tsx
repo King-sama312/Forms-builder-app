@@ -8,7 +8,7 @@ export default function StartupPage() {
   const router = useRouter();
 
   const handleBootComplete = useCallback(() => {
-    sessionStorage.setItem('win98-booted', 'true');
+    localStorage.setItem('win98-booted', 'true');
     router.replace('/');
   }, [router]);
 

@@ -14,13 +14,10 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
   };
 
   const handleSignOut = async () => {
+    onClose();
     try {
       await signOutAsync(undefined);
-    } catch {
-      // proceed even if server mutation fails
-    }
-    sessionStorage.removeItem('win98-booted');
-    onClose();
+    } catch {}
     window.location.href = '/login';
   };
 

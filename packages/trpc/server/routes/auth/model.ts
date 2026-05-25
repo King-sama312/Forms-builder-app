@@ -29,7 +29,7 @@ id: z.string().describe("uuid of the user"),
 profileImageUrl: z.string().describe("User's profile image url").optional().nullable()
 })
 
-export const signOutInputModel = z.undefined()
+export const signOutInputModel = z.object({}).optional()
 
 export const signOutOutputModel = z.object({
   message: z.string().describe("Sign out status message"),

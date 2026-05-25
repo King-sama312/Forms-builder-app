@@ -35,12 +35,18 @@ html, body {
   height: 16px;
 }
 
+/* Pixel-art rendering for retro icons */
+.pixel-art {
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
 /* Desktop icon styles */
 .desktop-icon {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 75px;
+  width: 82px;
   cursor: pointer;
   user-select: none;
   color: white;
@@ -55,7 +61,7 @@ html, body {
   background: rgba(0,0,128,0.3);
   border: 1px solid #000080;
 }
-.desktop-icon svg {
+.desktop-icon img {
   filter: drop-shadow(1px 1px 0 rgba(0,0,0,0.5));
 }
 
