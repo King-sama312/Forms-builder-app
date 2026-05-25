@@ -16,48 +16,81 @@ export function Taskbar() {
   return (
     <>
       <div
-        className="flex items-center px-[2px] h-[28px] fixed bottom-0 left-0 right-0 z-50"
         style={{
+          position: 'fixed',
+          bottom: 0,
+          left: 0,
+          width: '100%',
+          height: 28,
           background: '#c0c0c0',
-          boxShadow: 'inset 0 1px 0 #dfdfdf, inset 0 -1px 0 #404040',
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 2px',
+          zIndex: 9999,
+          boxSizing: 'border-box',
+          borderTop: '1px solid #dfdfdf',
         }}
       >
         <button
-          className="px-2 h-[22px] font-bold text-sm flex items-center gap-1 shrink-0"
-          style={{ borderStyle: 'outset', borderWidth: '2px', background: '#c0c0c0' }}
-          onClick={() => setStartOpen((s) => !s)}
+          onClick={() => setStartOpen(s => !s)}
+          style={{
+            height: 22,
+            padding: '0 8px',
+            fontFamily: 'inherit',
+            fontSize: 11,
+            fontWeight: 700,
+            background: '#c0c0c0',
+            border: '2px outset #fff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
+          }}
         >
-          <span className="inline-block w-4 h-4 bg-[#c0c0c0] border border-black">
-            <svg viewBox="0 0 16 16" className="w-full h-full">
-              <rect x="1" y="1" width="6" height="6" fill="#000080" />
-              <rect x="9" y="1" width="6" height="6" fill="#000080" />
-              <rect x="1" y="9" width="6" height="6" fill="#000080" />
-              <rect x="9" y="9" width="6" height="6" fill="#000080" />
-            </svg>
-          </span>
           Start
         </button>
 
-        <div className="flex-1 flex items-center gap-[2px] px-1 overflow-hidden min-w-0">
+        <div
+          style={{
+            flex: 1,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            padding: '0 4px',
+            overflow: 'hidden',
+            minWidth: 0,
+          }}
+        >
           {activeWindows.map(w => (
             <TaskbarItem key={w.id} active>{w.title}</TaskbarItem>
           ))}
           {minimizedWindows.map(w => (
-            <TaskbarItem
-              key={w.id}
-              active={false}
-              onClick={() => restoreWindow(w.id)}
-            >
+            <TaskbarItem key={w.id} active={false} onClick={() => restoreWindow(w.id)}>
               {w.title}
             </TaskbarItem>
           ))}
         </div>
 
         <div
-          className="px-2 h-[22px] text-xs flex items-center gap-2 shrink-0"
-          style={{ borderStyle: 'inset', borderWidth: '2px', background: '#c0c0c0' }}
+          style={{
+            height: 22,
+            padding: '0 8px',
+            fontSize: 11,
+            background: '#c0c0c0',
+            border: '2px inset #fff',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            flexShrink: 0,
+          }}
         >
-          {user && <span className="truncate max-w-[100px]">{user.email ?? user.fullName ?? 'User'}</span>}
+          {user && (
+            <span style={{ maxWidth: 100, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user.email ?? user.fullName ?? 'User'}
+            </span>
+          )}
           <Clock />
         </div>
       </div>
@@ -78,15 +111,22 @@ function TaskbarItem({
 }) {
   return (
     <div
-      className="px-2 h-[22px] text-xs flex items-center truncate max-w-[120px] cursor-pointer shrink-0"
       onClick={onClick}
       style={{
-        borderStyle: active ? 'inset' : 'outset',
-        borderWidth: '2px',
-        textDecoration: 'none',
-        color: '#000',
+        height: 22,
+        padding: '0 8px',
+        fontSize: 11,
         background: active ? '#d4d0c8' : '#c0c0c0',
+        border: active ? '2px inset #fff' : '2px outset #fff',
+        display: 'flex',
+        alignItems: 'center',
+        maxWidth: 140,
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+        cursor: onClick ? 'pointer' : 'default',
         userSelect: 'none',
+        flexShrink: 0,
       }}
     >
       {children}

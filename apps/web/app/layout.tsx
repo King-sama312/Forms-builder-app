@@ -25,10 +25,10 @@ export default function RootLayout({
                 */}
                 {children}
               </div>
-
-              {/* Taskbar always visible */}
-              <Taskbar />
             </div>
+
+            {/* Taskbar always visible (outside win98-desktop to avoid overflow clipping) */}
+            <Taskbar />
           </WindowsProvider>
         </GlobalProviders>
       </body>
