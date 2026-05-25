@@ -1,14 +1,26 @@
 'use client';
 
-import { useState, ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useEffect, ReactNode } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { DesktopIcons } from './desktop-icons';
 import { Taskbar } from './taskbar';
 import { ShutdownScreen } from './shutdown-screen';
 
 export function DesktopShell({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const [shuttingDown, setShuttingDown] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.altKey && e.key === 'n') {
+        e.preventDefault();
+        router.push('/forms/create-form');
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [router]);
 
   if (shuttingDown) {
     return <ShutdownScreen />;
