@@ -2,18 +2,17 @@
 
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { useGetFormById, useGetFormFields, useCreateFormSubmission } from '~/hooks/api/form/index';
+import { useGetFormById, useCreateFormSubmission } from '~/hooks/api/form/index';
 
 export default function PublicFormPage() {
   const params = useParams();
   const formId = params.formId as string;
-  const { form, isLoading: formLoading } = useGetFormById(formId);
-  const { fields, isLoading: fieldsLoading } = useGetFormFields(formId);
+  const { form, isLoading } = useGetFormById(formId);
   const { createFormSubmissionAsync, isPending } = useCreateFormSubmission();
   const [values, setValues] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState(false);
 
-  const isLoading = formLoading || fieldsLoading;
+  const fields = (form as any)?.fields;
 
   const handleChange = (fieldId: string, value: string) => {
     setValues((prev) => ({ ...prev, [fieldId]: value }));
@@ -76,20 +75,20 @@ export default function PublicFormPage() {
                 <div key={field.id} className="field-row-stacked">
                   <label className="text-sm font-bold">
                     {field.label}
-                    {field.required && <span className="text-red-600"> *</span>}
+                    {(field.isRequired ?? field.required) && <span className="text-red-600"> *</span>}
                   </label>
 
                   {field.type === 'textarea' ? (
                     <textarea
                       rows={3}
-                      required={field.required}
-                      placeholder={field.placeholder ?? ''}
+                      required={field.isRequired ?? field.required}
+                      placeholder={field.placeholeder ?? field.placeholder ?? ''}
                       value={values[field.id] ?? ''}
                       onChange={(e) => handleChange(field.id, e.target.value)}
                     />
                   ) : field.type === 'select' ? (
                     <select
-                      required={field.required}
+                      required={field.isRequired ?? field.required}
                       value={values[field.id] ?? ''}
                       onChange={(e) => handleChange(field.id, e.target.value)}
                     >
@@ -124,7 +123,7 @@ export default function PublicFormPage() {
                             type="radio"
                             name={field.id}
                             value={opt}
-                            required={field.required}
+                            required={field.isRequired ?? field.required}
                             checked={values[field.id] === opt}
                             onChange={(e) => handleChange(field.id, e.target.value)}
                           />
@@ -135,8 +134,8 @@ export default function PublicFormPage() {
                   ) : (
                     <input
                       type={field.type === 'number' ? 'number' : field.type}
-                      required={field.required}
-                      placeholder={field.placeholder ?? ''}
+                      required={field.isRequired ?? field.required}
+                      placeholder={field.placeholeder ?? field.placeholder ?? ''}
                       value={values[field.id] ?? ''}
                       onChange={(e) => handleChange(field.id, e.target.value)}
                     />

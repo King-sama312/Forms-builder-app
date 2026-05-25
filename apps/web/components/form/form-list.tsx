@@ -43,7 +43,6 @@ export function FormList() {
           className="flex items-center gap-2 p-2 hover:bg-[#000080] hover:text-white cursor-pointer border border-transparent hover:border-[#000080]"
           onDoubleClick={() => router.push(`/builder/${form.id}`)}
         >
-          <span className="text-lg">📋</span>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold truncate">{form.title}</p>
             <p className="text-xs truncate opacity-70">

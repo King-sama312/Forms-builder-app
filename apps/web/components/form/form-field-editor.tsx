@@ -94,7 +94,7 @@ export function FormFieldEditor({ formId }: { formId: string }) {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-3 gap-2 items-end">
                   <div className="field-row-stacked">
                     <label className="text-xs">Label</label>
                     <input
@@ -117,19 +117,28 @@ export function FormFieldEditor({ formId }: { formId: string }) {
                       }
                     />
                   </div>
-                </div>
-
-                <div className="flex items-center gap-2 mt-2">
-                  <label className="flex items-center gap-1 text-xs">
-                    <input
-                      type="checkbox"
-                      checked={field.required}
-                      onChange={(e) =>
-                        updateField(field.id, { required: e.target.checked })
+                  <div className="field-row-stacked">
+                    <label className="text-xs">Required</label>
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={field.required}
+                      onClick={() =>
+                        updateField(field.id, { required: !field.required })
                       }
-                    />
-                    Required
-                  </label>
+                      className={`relative inline-flex h-5 w-9 items-center border ${
+                        field.required
+                          ? 'bg-[#000080] border-[#000080]'
+                          : 'bg-[#c0c0c0] border-[#808080]'
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-3 w-3 border border-[#808080] bg-white transition-transform ${
+                          field.required ? 'translate-x-[18px]' : 'translate-x-[2px]'
+                        }`}
+                      />
+                    </button>
+                  </div>
                 </div>
 
                 {(field.type === 'select' || field.type === 'radio' || field.type === 'checkbox') && (

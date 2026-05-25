@@ -58,20 +58,20 @@ export function FormPreview({ formId, onClose }: { formId: string; onClose: () =
               <div key={field.id} className="field-row-stacked">
                 <label className="text-sm font-bold">
                   {field.label}
-                  {field.required && <span className="text-red-600"> *</span>}
+                    {(field.isRequired ?? field.required) && <span className="text-red-600"> *</span>}
                 </label>
 
                 {field.type === 'textarea' ? (
                   <textarea
                     rows={3}
-                    required={field.required}
-                    placeholder={field.placeholder ?? ''}
+                    required={field.isRequired ?? field.required}
+                    placeholder={field.placeholeder ?? field.placeholder ?? ''}
                     value={values[field.id] ?? ''}
                     onChange={(e) => handleChange(field.id, e.target.value)}
                   />
                 ) : field.type === 'select' ? (
                   <select
-                    required={field.required}
+                    required={field.isRequired ?? field.required}
                     value={values[field.id] ?? ''}
                     onChange={(e) => handleChange(field.id, e.target.value)}
                   >
@@ -104,14 +104,14 @@ export function FormPreview({ formId, onClose }: { formId: string; onClose: () =
                   <div className="flex flex-col gap-1">
                     {field.options?.map((opt: string) => (
                       <label key={opt} className="flex items-center gap-2 text-sm">
-                        <input
-                          type="radio"
-                          name={field.id}
-                          value={opt}
-                          required={field.required}
-                          checked={values[field.id] === opt}
-                          onChange={(e) => handleChange(field.id, e.target.value)}
-                        />
+                          <input
+                            type="radio"
+                            name={field.id}
+                            value={opt}
+                            required={field.isRequired ?? field.required}
+                            checked={values[field.id] === opt}
+                            onChange={(e) => handleChange(field.id, e.target.value)}
+                          />
                         {opt}
                       </label>
                     ))}
@@ -119,8 +119,8 @@ export function FormPreview({ formId, onClose }: { formId: string; onClose: () =
                 ) : (
                   <input
                     type={field.type === 'number' ? 'number' : field.type}
-                    required={field.required}
-                    placeholder={field.placeholder ?? ''}
+                    required={field.isRequired ?? field.required}
+                    placeholder={field.placeholeder ?? field.placeholder ?? ''}
                     value={values[field.id] ?? ''}
                     onChange={(e) => handleChange(field.id, e.target.value)}
                   />

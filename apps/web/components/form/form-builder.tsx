@@ -28,8 +28,8 @@ export function FormBuilder({ formId }: { formId: string }) {
         id: f.id,
         type: f.type as any,
         label: f.label,
-        placeholder: f.placeholder,
-        required: f.required,
+        placeholder: f.placeholeder ?? f.placeholder,
+        required: f.isRequired ?? f.required,
         options: f.options,
         order: f.order ?? i,
       }));

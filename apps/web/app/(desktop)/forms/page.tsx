@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Win98Window } from '~/components/win98-window';
 import { FormList } from '~/components/form/form-list';
-import { CreateFormModal } from '~/components/form/create-form-modal';
+import { trpc } from '~/trpc/client';
 
 export default function FormsPage() {
-  const [showCreate, setShowCreate] = useState(false);
+  const router = useRouter();
+  const utils = trpc.useUtils();
+
+  const handleRefresh = () => {
+    utils.form.listForms.invalidate();
+  };
 
   return (
     <Win98Window
@@ -16,10 +21,10 @@ export default function FormsPage() {
       <div className="flex flex-col h-full">
         {/* Toolbar */}
         <div className="flex items-center gap-2 mb-2 pb-2 border-b border-[#808080]">
-          <button onClick={() => setShowCreate(true)}>
+          <button onClick={() => router.push('/forms/create-form')}>
             📄 New Form
           </button>
-          <button onClick={() => window.location.reload()}>
+          <button onClick={handleRefresh}>
             🔄 Refresh
           </button>
         </div>
@@ -34,8 +39,6 @@ export default function FormsPage() {
           Double-click a form to open the builder.
         </div>
       </div>
-
-      {showCreate && <CreateFormModal onClose={() => setShowCreate(false)} />}
     </Win98Window>
   );
 }

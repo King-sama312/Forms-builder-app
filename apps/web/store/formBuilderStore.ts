@@ -36,7 +36,7 @@ interface FormBuilderState {
 }
 
 function generateId(): string {
-  return crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  return `new-${crypto.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;
 }
 
 export const useFormBuilderStore = create<FormBuilderState>((set) => ({
