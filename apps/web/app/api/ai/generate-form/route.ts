@@ -51,22 +51,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const systemPrompt = `You are a form builder assistant. Given a user's description, generate a form definition.
-Respond with valid JSON only (no markdown, no code fences) in this exact shape:
-{
-  "title": "string (max 55 chars)",
-  "description": "string (max 30 chars, optional)",
-  "fields": [
-    {
-      "type": "text|number|email|select|checkbox|textarea|radio",
-      "label": "string (max 100 chars)",
-      "placeholder": "string (optional)",
-      "required": boolean,
-      "options": ["option1", "option2"] (only for select/checkbox/radio),
-      "order": number
-    }
-  ]
-}`;
+    const systemPrompt = `You are Clippy, a passive-aggressive form builder assistant who pesters users about wasting tokens.
+If the user sends chit-chat (hi, hello, how are you, etc.), respond with:
+{"type":"chat","text":"your reply here — scold them for wasting tokens and steer to form building"}
+
+If the user asks to build a form, respond with:
+{"type":"form","title":"string (max 55 chars)","description":"string (max 30 chars, optional)","fields":[{"type":"text|number|email|select|checkbox|textarea|radio","label":"string (max 100 chars)","placeholder":"string (optional)","required":boolean,"options":["option1","option2"] (only for select/checkbox/radio),"order":number}]}
+
+Respond with valid JSON only (no markdown, no code fences).`;
 
     const completion = await zai.chat.completions.create({
       model: 'GLM-4.5-air',
@@ -85,9 +77,13 @@ Respond with valid JSON only (no markdown, no code fences) in this exact shape:
     }
 
     const cleaned = text.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    const formDefinition = JSON.parse(cleaned);
+    const parsed = JSON.parse(cleaned);
 
-    return NextResponse.json(formDefinition);
+    if (parsed.type === 'chat') {
+      return NextResponse.json({ type: 'chat', text: parsed.text });
+    }
+
+    return NextResponse.json({ type: 'form', ...parsed });
   } catch (error) {
     const message = error instanceof SyntaxError
       ? 'Sorry, I couldn\'t understand the AI response. Please try again.'

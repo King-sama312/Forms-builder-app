@@ -27,6 +27,10 @@ interface GeneratedForm {
   fields: GeneratedField[];
 }
 
+type ClippyResponse =
+  | { type: 'chat'; text: string }
+  | { type: 'form'; title: string; description?: string; fields: GeneratedField[] };
+
 type FieldType = 'text' | 'number' | 'email' | 'select' | 'checkbox' | 'textarea' | 'radio';
 
 function sanitizeFieldType(type: string): FieldType {
@@ -46,7 +50,6 @@ const TIPS = [
   "Psst... I can build forms while you relax.",
   "You can ask me for a contact form, survey, registration, and more!",
   "Don't want to drag and drop? Just chat with me!",
-  "I use GLM-4.5-air to understand what you need.",
 ];
 
 export function Clippy() {
@@ -156,14 +159,19 @@ export function Clippy() {
         throw new Error(errData.error || 'Failed to generate form');
       }
 
-      const form: GeneratedForm = await res.json();
+      const data: ClippyResponse = await res.json();
 
       setMessages(prev => prev.slice(0, -1));
-      setMessages(prev => [...prev, {
-        role: 'clippy',
-        text: `I've created a form called "${form.title}" with ${form.fields.length} field${form.fields.length === 1 ? '' : 's'}. Take a look below!`,
-      }]);
-      setGeneratedForm(form);
+
+      if (data.type === 'chat') {
+        setMessages(prev => [...prev, { role: 'clippy', text: data.text }]);
+      } else {
+        setMessages(prev => [...prev, {
+          role: 'clippy',
+          text: `I've created a form called "${data.title}" with ${data.fields.length} field${data.fields.length === 1 ? '' : 's'}. Take a look below!`,
+        }]);
+        setGeneratedForm(data);
+      }
     } catch (err: any) {
       setMessages(prev => prev.slice(0, -1));
       setMessages(prev => [...prev, {
@@ -228,8 +236,8 @@ export function Clippy() {
     <>
       <div className="fixed bottom-14 right-4 z-99999 flex flex-col items-end gap-1">
         {(showBubble || showLoginBubble) && (
-          <div className="relative bg-[#ffffcc] border-2 border-[#000080] rounded px-3 py-2 text-xs max-w-[200px] shadow-[2px_2px_0px_#000]">
-            <div className="absolute bottom-[-7px] right-8 w-3 h-3 bg-[#ffffcc] border-r-2 border-b-2 border-[#000080] rotate-45" />
+          <div className="relative bg-[#ffffcc] border-2 border-[#000080] rounded px-3 py-2 text-xs max-w-50 shadow-[2px_2px_0px_#000]">
+            <div className="absolute -bottom-1.75 right-8 w-3 h-3 bg-[#ffffcc] border-r-2 border-b-2 border-[#000080] rotate-45" />
             <p className="leading-tight">
               {showLoginBubble ? 'Log in to use me to make forms!' : bubbleMessage}
             </p>
@@ -246,7 +254,7 @@ export function Clippy() {
 
         <button
           onClick={handleClippyClick}
-          className="w-[72px] h-[72px] bg-[#c0c0c0] border-2 border-[#dfdfdf] border-r-[#808080] border-b-[#808080] flex flex-col items-center justify-center gap-0.5 hover:bg-[#d4d4d0] active:border-[#808080] active:border-r-[#dfdfdf] active:border-b-[#dfdfdf] cursor-pointer"
+          className="w-18 h-18 bg-[#c0c0c0] border-2 border-[#dfdfdf] border-r-[#808080] border-b-[#808080] flex flex-col items-center justify-center gap-0.5 hover:bg-[#d4d4d0] active:border-[#808080] active:border-r-[#dfdfdf] active:border-b-[#dfdfdf] cursor-pointer"
           title="Clippy - AI Form Assistant"
         >
           <img
