@@ -1,0 +1,4 @@
+{
+  "baseUrl": "${ZAI_BASE_URL}",
+  "apiKey": "${ZAI_API_KEY}"
+}

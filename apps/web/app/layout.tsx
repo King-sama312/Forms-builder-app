@@ -1,5 +1,7 @@
 import './globals.css';
 import { GlobalProviders } from '~/providers/global';
+import { WindowsProvider } from '~/components/windows-context';
+import { Clippy } from '~/components/clippy';
 
 export default function RootLayout({
   children,
@@ -9,7 +11,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <GlobalProviders>{children}</GlobalProviders>
+        <GlobalProviders>
+          <WindowsProvider>
+            {children}
+            <Clippy />
+          </WindowsProvider>
+        </GlobalProviders>
       </body>
     </html>
   );
