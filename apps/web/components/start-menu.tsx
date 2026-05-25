@@ -6,26 +6,28 @@ import { useGetUserInfo, useSignOut } from '~/hooks/api/auth/index';
 export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShutdown?: () => void }) {
   const router = useRouter();
   const { user } = useGetUserInfo();
-  const { signOut } = useSignOut();
+  const { signOutAsync } = useSignOut();
 
   const handleClick = (href: string) => {
     router.push(href);
     onClose();
   };
 
-  const handleSignOut = () => {
-    signOut(undefined, {
-      onSuccess: () => {
-        onClose();
-        router.push('/');
-      },
-    });
+  const handleSignOut = async () => {
+    try {
+      await signOutAsync(undefined);
+    } catch {
+      // proceed even if server mutation fails
+    }
+    sessionStorage.removeItem('win98-booted');
+    onClose();
+    window.location.href = '/login';
   };
 
   return (
     <div
-      className="fixed bottom-[28px] left-0 w-48 bg-[#c0c0c0] border-2 z-[99]"
-      style={{ borderStyle: 'outset' }}
+      className="fixed bottom-[28px] left-0 w-52 bg-[#c0c0c0] border-2 z-[99]"
+      style={{ borderStyle: 'outset', minHeight: 280 }}
       onMouseLeave={onClose}
     >
       <div className="flex">
