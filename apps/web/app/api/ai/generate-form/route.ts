@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
-import ZAI from 'z-ai-web-dev-sdk';
+import ZAI, { type ZAIConfig } from 'z-ai-web-dev-sdk';
 
 function resolveEnvVars(value: string): string {
   return value.replace(/\$\{(\w+)\}/g, (_, name) => process.env[name] ?? '');
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
     let zai: ZAI;
     try {
       const config = await loadZaiConfig();
-      zai = new ZAI(config);
+      zai = new (ZAI as unknown as new (config: ZAIConfig) => ZAI)(config);
     } catch {
       return NextResponse.json(
         { error: 'AI service is not configured. Please set up your .z-ai-config file.' },
