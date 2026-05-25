@@ -57,6 +57,9 @@ export function FormBuilder({ formId }: { formId: string }) {
           <button onClick={() => router.push(`/builder/${formId}/preview`)}>
             👁 Preview
           </button>
+          <button onClick={() => router.push(`/builder/${formId}/submissions`)}>
+            📊 Submissions
+          </button>
         </div>
 
         {isLoading ? (
