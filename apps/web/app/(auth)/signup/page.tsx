@@ -1,11 +1,20 @@
-import { SignupForm } from "~/components/signup-form"
+'use client';
 
-export default function Page() {
+import { Win98Window } from '~/components/win98-window';
+import { RegisterForm } from '~/components/auth/register-form';
+
+export default function SignupPage() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
-        <SignupForm />
+    <Win98Window
+      title="Register New User"
+      defaultPosition={{ x: 220, y: 130, width: 400, height: 300 }}
+    >
+      <div className="flex flex-col h-full">
+        <p className="text-sm mb-4">
+          Create a new account to start building forms.
+        </p>
+        <RegisterForm />
       </div>
-    </div>
-  )
+    </Win98Window>
+  );
 }

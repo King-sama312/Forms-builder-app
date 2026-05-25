@@ -1,4 +1,4 @@
-import { db, eq, desc } from "@repo/database";
+import { db, eq, asc, desc } from "@repo/database";
 import { formsTable } from "@repo/database/models/form";
 import { formFieldsTable } from "@repo/database/models/form_field";
 import { CreateFormInputType, createFormInput, ListFormsByUserIdInputType, listFormsByUserIdInput, GetFormByIdInputType, getFormByIdInput } from "./model";
@@ -48,11 +48,16 @@ class FormService {
       throw new Error(`Form not found`);
     }
 
-    const fields = await db
+    const rows = await db
       .select()
       .from(formFieldsTable)
       .where(eq(formFieldsTable.formId, formId))
-      .orderBy(formFieldsTable.index);
+      .orderBy(asc(formFieldsTable.order), asc(formFieldsTable.index));
+
+    const fields = rows.map((r) => ({
+      ...r,
+      options: r.options as string[] | null,
+    }));
 
     return { ...form, fields };
   }

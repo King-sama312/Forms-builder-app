@@ -1,11 +1,20 @@
-import { LoginForm } from "~/components/login-form"
+'use client';
 
-export default function Page() {
+import { Win98Window } from '~/components/win98-window';
+import { LoginForm } from '~/components/auth/login-form';
+
+export default function LoginPage() {
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
+    <Win98Window
+      title="Login"
+      defaultPosition={{ x: 200, y: 150, width: 380, height: 260 }}
+    >
+      <div className="flex flex-col h-full">
+        <p className="text-sm mb-4">
+          Enter your credentials to access the Form Builder.
+        </p>
         <LoginForm />
       </div>
-    </div>
-  )
+    </Win98Window>
+  );
 }

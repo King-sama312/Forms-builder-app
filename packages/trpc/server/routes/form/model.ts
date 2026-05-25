@@ -34,6 +34,8 @@ export const createFormFieldInputModel = z.object({
   isRequired: z.boolean().default(false).describe("Whether the field is required"),
   index: z.string().describe("Fractional index for sorting"),
   type: fieldTypeEnumSchema.describe("Type of the field"),
+  options: z.array(z.string()).optional().describe("Options for select type"),
+  order: z.number().int().default(0).describe("Display order"),
 });
 
 export const updateFormFieldInputModel = z.object({
@@ -62,6 +64,22 @@ export const getFormByIdInputModel = z.object({
   formId: z.string().uuid().describe("UUID of the form"),
 });
 
+const fieldOutputModel = z.object({
+  id: z.string().uuid(),
+  formId: z.string().uuid().nullable().optional(),
+  label: z.string(),
+  labelKey: z.string(),
+  description: z.string().nullable().optional(),
+  placeholeder: z.string().nullable().optional(),
+  isRequired: z.boolean(),
+  index: z.string(),
+  type: fieldTypeEnumSchema,
+  options: z.array(z.string()).nullable().optional(),
+  order: z.number().int(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+});
+
 export const getFormByIdOutputModel = z.object({
   id: z.string().uuid(),
   title: z.string(),
@@ -69,21 +87,7 @@ export const getFormByIdOutputModel = z.object({
   createdBy: z.string().uuid().nullable().optional(),
   createdAt: z.date().nullable().optional(),
   updatedAt: z.date().nullable().optional(),
-  fields: z.array(
-    z.object({
-      id: z.string().uuid(),
-      formId: z.string().uuid().nullable().optional(),
-      label: z.string(),
-      labelKey: z.string(),
-      description: z.string().nullable().optional(),
-      placeholeder: z.string().nullable().optional(),
-      isRequired: z.boolean(),
-      index: z.string(),
-      type: fieldTypeEnumSchema,
-      createdAt: z.date().nullable().optional(),
-      updatedAt: z.date().nullable().optional(),
-    })
-  ),
+  fields: z.array(fieldOutputModel),
 });
 
 const formSubmissionValueModel = z.object({
@@ -114,18 +118,32 @@ export const getFormSubmissionsOutputModel = z.array(
   })
 );
 
-export const getFormFieldsOutputModel = z.array(
-  z.object({
-    id: z.string().uuid(),
-    formId: z.string().uuid().nullable().optional(),
-    label: z.string(),
-    labelKey: z.string(),
-    description: z.string().nullable().optional(),
-    placeholeder: z.string().nullable().optional(),
-    isRequired: z.boolean(),
-    index: z.string(),
+export const getFormFieldsOutputModel = z.array(fieldOutputModel);
+
+// NEW — Field management input/output models
+export const updateFieldsInputModel = z.object({
+  formId: z.string().uuid(),
+  fields: z.array(z.object({
+    id: z.string().uuid().optional(),
     type: fieldTypeEnumSchema,
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-  })
-);
+    label: z.string().min(1),
+    placeholder: z.string().optional(),
+    required: z.boolean().default(false),
+    options: z.array(z.string()).optional(),
+    order: z.number().int(),
+  })),
+});
+
+export const updateFieldsOutputModel = z.object({
+  success: z.boolean(),
+});
+
+export const deleteFieldInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+  fieldId: z.string().uuid().describe("UUID of the field to delete"),
+});
+
+export const reorderFieldsInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+  fieldIds: z.array(z.string().uuid()).describe("Field IDs in new order"),
+});

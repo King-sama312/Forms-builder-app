@@ -18,6 +18,10 @@ import {
   createFormSubmissionOutputModel,
   getFormSubmissionsInputModel,
   getFormSubmissionsOutputModel,
+  updateFieldsInputModel,
+  updateFieldsOutputModel,
+  deleteFieldInputModel,
+  reorderFieldsInputModel,
 } from "./model";
 
 const TAGS = ["Form"];
@@ -36,7 +40,6 @@ export const formRouter = router({
     .output(createFormOutputModel)
     .mutation(async ({ input, ctx }) => {
       const { title, description } = input;
-      // authenticatedProcedure ensures ctx.user.id is populated
       const createdBy = ctx.user.id;
 
       const { id } = await formService.createForm({
@@ -93,7 +96,7 @@ export const formRouter = router({
     .input(deleteFormFieldInputModel)
     .output(formFieldActionOutputModel)
     .mutation(async ({ input }) => {
-      const result = await formFieldService.deleteField(input);
+      const result = await formFieldService.deleteFieldById(input);
       return result;
     }),
 
@@ -138,6 +141,78 @@ export const formRouter = router({
     .output(getFormFieldsOutputModel)
     .query(async ({ input }) => {
       const result = await formFieldService.getFields(input);
+      return result;
+    }),
+
+  // NEW — Field management procedures
+
+  updateFields: authenticatedProcedure
+    .meta({
+      openapi: { method: "PUT", path: getPath("/updateFields"), tags: TAGS, protect: true },
+    })
+    .input(updateFieldsInputModel)
+    .output(updateFieldsOutputModel)
+    .mutation(async ({ ctx, input }) => {
+      const form = await formService.getFormById({ formId: input.formId });
+      if (form.createdBy !== ctx.user.id) {
+        throw new Error("Unauthorized");
+      }
+
+      const mapped = input.fields.map((f, i) => ({
+        id: f.id,
+        type: f.type,
+        label: f.label,
+        labelKey: f.label.toLowerCase().replace(/\s+/g, "_").replace(/[^a-z0-9_]/g, ""),
+        description: undefined as string | undefined,
+        placeholeder: f.placeholder,
+        isRequired: f.required,
+        index: (i + 1).toFixed(2),
+        options: f.options,
+        order: f.order ?? i,
+      }));
+
+      const result = await formFieldService.upsertFields({
+        formId: input.formId,
+        fields: mapped,
+      });
+      return result;
+    }),
+
+  deleteField: authenticatedProcedure
+    .meta({
+      openapi: { method: "DELETE", path: getPath("/deleteField"), tags: TAGS, protect: true },
+    })
+    .input(deleteFieldInputModel)
+    .output(formFieldActionOutputModel)
+    .mutation(async ({ ctx, input }) => {
+      const form = await formService.getFormById({ formId: input.formId });
+      if (form.createdBy !== ctx.user.id) {
+        throw new Error("Unauthorized");
+      }
+
+      const result = await formFieldService.deleteField({
+        formId: input.formId,
+        fieldId: input.fieldId,
+      });
+      return result;
+    }),
+
+  reorderFields: authenticatedProcedure
+    .meta({
+      openapi: { method: "PUT", path: getPath("/reorderFields"), tags: TAGS, protect: true },
+    })
+    .input(reorderFieldsInputModel)
+    .output(updateFieldsOutputModel)
+    .mutation(async ({ ctx, input }) => {
+      const form = await formService.getFormById({ formId: input.formId });
+      if (form.createdBy !== ctx.user.id) {
+        throw new Error("Unauthorized");
+      }
+
+      const result = await formFieldService.reorderFields({
+        formId: input.formId,
+        fieldIds: input.fieldIds,
+      });
       return result;
     }),
 });

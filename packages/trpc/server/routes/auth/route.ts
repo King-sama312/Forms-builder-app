@@ -1,6 +1,6 @@
 import { userService } from "../../services";
 import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
-import { getAuthenticationCookie, setAuthenticationCookie } from "../../utils/cookie";
+import { clearAuthenticationCookie, getAuthenticationCookie, setAuthenticationCookie } from "../../utils/cookie";
 import { generatePath } from "../../utils/path-generator";
 import {
   createUserWithEmailAndPasswordInputModel,
@@ -9,6 +9,8 @@ import {
   getLoggedInUserInfoOutputModel,
   signInUserWithEmailAndPasswordInputModel,
   signInUserWithEmailAndPasswordOutputModel,
+  signOutInputModel,
+  signOutOutputModel,
 } from "./model";
 
 const TAGS = ["Authentication"];
@@ -56,6 +58,27 @@ export const authRouter = router({
       setAuthenticationCookie(ctx, token);
 
       return { id };
+    }),
+
+  signOut: authenticatedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: getPath("/signOut"),
+        tags: TAGS,
+        protect: true,
+      },
+    })
+    .input(signOutInputModel)
+    .output(signOutOutputModel)
+    .mutation(async ({ ctx }) => {
+      const token = getAuthenticationCookie(ctx);
+
+      await userService.signOut({ token });
+
+      clearAuthenticationCookie(ctx);
+
+      return { message: "Signed out successfully" };
     }),
 
   getLoggedInUserInfo: authenticatedProcedure

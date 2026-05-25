@@ -1,4 +1,6 @@
+import { useCallback } from "react";
 import { trpc } from "~/trpc/client";
+import { useFormBuilderStore } from "~/store/formBuilderStore";
 
 export const useCreateForm = () => {
   const utils = trpc.useUtils();
@@ -12,6 +14,7 @@ export const useCreateForm = () => {
     isIdle,
     isSuccess,
     status,
+    isPending
   } = trpc.form.createForm.useMutation({
     onSuccess: async () => {
       await utils.form.invalidate();
@@ -27,6 +30,7 @@ export const useCreateForm = () => {
     isIdle,
     isSuccess,
     status,
+    isPending
   };
 };
 
@@ -159,4 +163,44 @@ export const useDeleteFormField = (formId: string) => {
   });
 
   return { deleteFormFieldAsync, deleteFormField, error, failureCount, isError, isIdle, isSuccess, status };
+};
+
+export const useFormBuilderSync = (formId: string) => {
+  const utils = trpc.useUtils();
+  const fields = useFormBuilderStore((s) => s.fields);
+  const isSaving = useFormBuilderStore((s) => s.isSaving);
+  const markSaving = useFormBuilderStore((s) => s.markSaving);
+  const markSaved = useFormBuilderStore((s) => s.markSaved);
+
+  const updateFieldsMutation = trpc.form.updateFields.useMutation({
+    onSuccess: async () => {
+      await utils.form.getFormFields.invalidate({ formId });
+      markSaved();
+    },
+    onError: () => {
+      markSaved();
+    },
+  });
+
+  const save = useCallback(async () => {
+    if (fields.length === 0) return;
+    markSaving();
+
+    const mapped = fields.map((f) => ({
+      id: f.id.startsWith("new-") ? undefined : f.id,
+      type: f.type,
+      label: f.label || "Untitled",
+      placeholder: f.placeholder ?? undefined,
+      required: f.required,
+      options: f.options ?? undefined,
+      order: f.order,
+    }));
+
+    await updateFieldsMutation.mutateAsync({
+      formId,
+      fields: mapped,
+    });
+  }, [fields, formId, updateFieldsMutation, markSaving]);
+
+  return { save, isSaving };
 };

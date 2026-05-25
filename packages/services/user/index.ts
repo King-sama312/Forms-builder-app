@@ -3,9 +3,11 @@ import {
   type CreateUserWithEmailAndPasswordInputType,
   GenerateUserTokenPayloadType,
   SignInUserWithEmailAndPasswordInputType,
+  type SignOutInputType,
   createUserWithEmailAndPasswordInput,
   generateUserTokenPayload,
   signInUserWithEmailAndPasswordInput,
+  signOutInput,
 } from "./model";
 import { db, eq } from "@repo/database";
 import { usersTable } from "@repo/database/models/user";
@@ -107,6 +109,12 @@ class UserService {
   public async verifyAndDecodeUserToken(token:string){
     const {id} = await this.verifyUserToken(token)
      return {id}
+  }
+
+  public async signOut(payload: SignOutInputType) {
+    const { token } = await signOutInput.parseAsync(payload);
+    await this.verifyUserToken(token);
+    return { message: "Signed out successfully" };
   }
 }
 

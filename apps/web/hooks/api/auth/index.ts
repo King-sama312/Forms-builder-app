@@ -11,6 +11,7 @@ export const useSignUp = () => {
     isIdle,
     isSuccess,
     status,
+    isPending
   } = trpc.auth.createUserWithEmailAndPassword.useMutation({
     onSuccess: async () => {
       utils.auth.getLoggedInUserInfo.invalidate();
@@ -25,6 +26,7 @@ export const useSignUp = () => {
     isIdle,
     isSuccess,
     status,
+    isPending
   };
 };
 
@@ -40,6 +42,7 @@ export const useSignIn = () => {
     isIdle,
     isSuccess,
     status,
+    isPending
   } = trpc.auth.signInUserWithEmailAndPassword.useMutation({
     onSuccess: async()=>{
       utils.auth.getLoggedInUserInfo.invalidate()
@@ -55,6 +58,7 @@ export const useSignIn = () => {
     isIdle,
     isSuccess,
     status,
+    isPending
   };
 };
 
@@ -69,4 +73,34 @@ export const useGetUserInfo = () => {
   } = trpc.auth.getLoggedInUserInfo.useQuery();
 
   return { user, isError, isFetched, isFetching, isLoading, status };
+};
+
+export const useSignOut = () => {
+  const utils = trpc.useUtils();
+
+  const {
+    mutateAsync: signOutAsync,
+    mutate: signOut,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  } = trpc.auth.signOut.useMutation({
+    onSuccess: async () => {
+      utils.auth.getLoggedInUserInfo.invalidate();
+    },
+  });
+
+  return {
+    signOutAsync,
+    signOut,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  };
 };

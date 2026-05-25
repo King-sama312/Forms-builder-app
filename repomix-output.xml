@@ -1,0 +1,4798 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+apps/
+  api/
+    src/
+      env.ts
+      index.ts
+      server.ts
+    .eslintrc.cjs
+    package.json
+    tsconfig.json
+    tsup.config.ts
+  web/
+    app/
+      dashboard/
+        forms/
+          _components/
+            create-form-dialog.tsx
+            form-list.tsx
+          [id]/
+            _components/
+              form-builder.tsx
+            submissions/
+              _components/
+                submissions-table.tsx
+              page.tsx
+            page.tsx
+          page.tsx
+        data.json
+        layout.tsx
+        page.tsx
+      fonts/
+        GeistMonoVF.woff
+        GeistVF.woff
+      form/
+        [form_id]/
+          page.tsx
+      favicon.ico
+      globals.css
+      layout.tsx
+      page.tsx
+    hooks/
+      api/
+        auth/
+          index.ts
+        form/
+          index.ts
+      use-mobile.ts
+    lib/
+      utils.ts
+    providers/
+      global.tsx
+    public/
+      file-text.svg
+      globe.svg
+      next.svg
+      turborepo-dark.svg
+      turborepo-light.svg
+      vercel.svg
+      window.svg
+    trpc/
+      client.ts
+      create-client.ts
+      server.ts
+    .gitignore
+    components.json
+    env.js
+    eslint.config.js
+    next.config.js
+    package.json
+    postcss.config.mjs
+    README.md
+    tsconfig.json
+packages/
+  database/
+    models/
+      form_field.ts
+      form_submission.ts
+      form.ts
+      user.ts
+    .eslintrc.cjs
+    drizzle.config.ts
+    env.ts
+    index.ts
+    package.json
+    schema.ts
+    tsconfig.json
+  eslint-config/
+    base.js
+    next.js
+    package.json
+    react-internal.js
+    README.md
+  logger/
+    .eslintrc.cjs
+    env.ts
+    index.ts
+    package.json
+    tsconfig.json
+  services/
+    form/
+      index.ts
+      model.ts
+    form-field/
+      index.ts
+      model.ts
+    form-submission/
+      index.ts
+      model.ts
+    user/
+      index.ts
+      model.ts
+    .eslintrc.cjs
+    env.ts
+    package.json
+    tsconfig.json
+  trpc/
+    client/
+      index.ts
+    server/
+      routes/
+        auth/
+          model.ts
+          route.ts
+        form/
+          model.ts
+          route.ts
+        health/
+          route.ts
+      services/
+        index.ts
+      utils/
+        cookie.ts
+        path-generator.ts
+      context.ts
+      index.ts
+      schema.ts
+      trpc.ts
+    .eslintrc.cjs
+    package.json
+    tsconfig.json
+  typescript-config/
+    base.json
+    nextjs.json
+    node.json
+    package.json
+.gitignore
+.npmrc
+docker-compose.yml
+package.json
+pnpm-workspace.yaml
+prettier.config.js
+README.md
+setup.sh
+turbo.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="apps/api/src/env.ts">
+import { z } from "zod";
+
+const envSchema = z.object({
+  PORT: z.string().optional(),
+  NODE_ENV: z.enum(["development", "prod"]).default("development"),
+  BASE_URL: z.string().default("http://localhost:8000"),
+});
+
+function createEnv(env: NodeJS.ProcessEnv) {
+  const safeParseResult = envSchema.safeParse(env);
+  if (!safeParseResult.success) throw new Error(safeParseResult.error.message);
+  return safeParseResult.data;
+}
+
+export const env = createEnv(process.env);
+</file>
+
+<file path="apps/api/src/index.ts">
+import http from "node:http";
+import { logger } from "@repo/logger";
+import { app as expressApplication } from "./server";
+
+import { env } from "./env";
+
+async function init() {
+  try {
+    const server = http.createServer(expressApplication);
+    const PORT: number = env.PORT ? +env.PORT : 8000;
+    server.listen(PORT, () => {
+      logger.info(`http server is running on PORT ${PORT}`);
+    });
+  } catch (err) {
+    logger.error(`Error creating http server`, { err });
+    process.exit(1);
+  }
+}
+
+init();
+</file>
+
+<file path="apps/api/.eslintrc.cjs">
+/** @type {import("eslint").Linter.Config} */
+const config = {
+  extends: ["@repo/eslint-config/node.js"],
+};
+
+module.exports = config;
+</file>
+
+<file path="apps/api/tsconfig.json">
+{
+  "extends": "@repo/typescript-config/node.json",
+  "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "moduleResolution": "Node",
+    "module": "CommonJS",
+
+    // We don't need these for our final build
+    "declarationMap": false,
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": ["src"],
+  "ts-node": {
+    "swc": true
+  }
+}
+</file>
+
+<file path="apps/api/tsup.config.ts">
+import { defineConfig } from "tsup";
+
+export default defineConfig({
+  entry: ["./src/index.ts"],
+  noExternal: ["@teachyst"], // transpile packages starting with `@teachyst` and their dependencies
+  splitting: false,
+  bundle: true,
+  outDir: "./dist",
+  clean: true,
+  env: { IS_SERVER_BUILD: "true" },
+  loader: { ".json": "copy" },
+  minify: true,
+  sourcemap: false,
+});
+</file>
+
+<file path="apps/web/app/dashboard/forms/_components/create-form-dialog.tsx">
+"use client";
+
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "~/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "~/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
+import { useCreateForm } from "~/hooks/api/form";
+
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required").max(55, "Title must be at most 55 characters"),
+  description: z.string().max(30, "Description must be at most 30 characters").optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+export function CreateFormDialog() {
+  const [open, setOpen] = useState(false);
+  const { createFormAsync, status } = useCreateForm();
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: "",
+      description: "",
+    },
+  });
+
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await createFormAsync(data);
+      form.reset();
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to create form", error);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button className="mt-4">Create Form</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Create Form</DialogTitle>
+          <DialogDescription>
+            Give your new form a title and an optional description to get started.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="E.g. Customer Feedback" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Briefly describe what this form is about"
+                      className="resize-none"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Max 30 characters.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit" disabled={status === "pending"}>
+                {status === "pending" ? "Creating..." : "Create"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+</file>
+
+<file path="apps/web/app/dashboard/forms/_components/form-list.tsx">
+"use client";
+
+import { useListForms } from "~/hooks/api/form";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { Button } from "~/components/ui/button";
+import Link from "next/link";
+import { format } from "date-fns";
+
+export function FormList() {
+  const { forms, isLoading, isError } = useListForms();
+
+  if (isLoading) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+        <div className="text-sm text-muted-foreground">Loading forms...</div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+        <div className="text-sm text-destructive">Failed to load forms.</div>
+      </div>
+    );
+  }
+
+  if (!forms || forms.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+        <div className="text-sm text-muted-foreground">
+          You have no forms yet. Create one to get started!
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+      <h2 className="text-xl font-semibold mb-4">Your Forms</h2>
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Title</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Created At</TableHead>
+              <TableHead className="text-right">Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {forms.map((form) => (
+              <TableRow key={form.id}>
+                <TableCell className="font-medium">{form.title}</TableCell>
+                <TableCell className="text-muted-foreground">{form.description || "-"}</TableCell>
+                <TableCell className="text-muted-foreground">
+                  {form.createdAt ? format(new Date(form.createdAt), "MMM d, yyyy") : "-"}
+                </TableCell>
+                <TableCell className="text-right">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/dashboard/forms/${form.id}`}>Edit</Link>
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="apps/web/app/dashboard/forms/[id]/_components/form-builder.tsx">
+"use client";
+
+import { useState } from "react";
+import { toast } from "sonner";
+import {
+  AlignLeft,
+  Hash,
+  Mail,
+  ToggleLeft,
+  Lock,
+  Plus,
+  Trash2,
+  GripVertical,
+  Loader2,
+} from "lucide-react";
+import {
+  useGetFormFields,
+  useCreateFormField,
+  useUpdateFormField,
+  useDeleteFormField,
+} from "~/hooks/api/form";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Badge } from "~/components/ui/badge";
+import { Separator } from "~/components/ui/separator";
+import { Switch } from "~/components/ui/switch";
+
+type FieldType = "TEXT" | "NUMBER" | "EMAIL" | "YES_NO" | "PASSWORD";
+
+const FIELD_TYPES: { value: FieldType; label: string; icon: React.ReactNode }[] = [
+  { value: "TEXT", label: "Text", icon: <AlignLeft className="size-4" /> },
+  { value: "NUMBER", label: "Number", icon: <Hash className="size-4" /> },
+  { value: "EMAIL", label: "Email", icon: <Mail className="size-4" /> },
+  { value: "YES_NO", label: "Yes / No", icon: <ToggleLeft className="size-4" /> },
+  { value: "PASSWORD", label: "Password", icon: <Lock className="size-4" /> },
+];
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, "_")
+    .replace(/[^a-z0-9_]/g, "");
+}
+
+/** Generate a fractional index after the last existing field */
+function nextIndex(fields: { index: string }[]) {
+  if (fields.length === 0) return "1.00";
+  const max = Math.max(...fields.map((f) => parseFloat(f.index)));
+  return (max + 1).toFixed(2);
+}
+
+interface FormBuilderProps {
+  formId: string;
+}
+
+export function FormBuilder({ formId }: FormBuilderProps) {
+  const { fields, isLoading } = useGetFormFields(formId);
+  const { createFormFieldAsync, isLoading: isCreating } = useCreateFormField() as any;
+  const { deleteFormFieldAsync } = useDeleteFormField(formId);
+  const { updateFormFieldAsync } = useUpdateFormField(formId);
+
+  const [newLabel, setNewLabel] = useState("");
+  const [newDescription, setNewDescription] = useState("");
+  const [newType, setNewType] = useState<FieldType>("TEXT");
+  const [newRequired, setNewRequired] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editLabel, setEditLabel] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editRequired, setEditRequired] = useState(false);
+
+  const handleAddField = async () => {
+    const label = newLabel.trim();
+    if (!label) {
+      toast.error("Please enter a field label");
+      return;
+    }
+    try {
+      await createFormFieldAsync({
+        formId,
+        label,
+        labelKey: slugify(label),
+        type: newType,
+        index: nextIndex(fields ?? []),
+        isRequired: newRequired,
+        description: newDescription.trim() || undefined,
+      });
+      setNewLabel("");
+      setNewDescription("");
+      setNewRequired(false);
+      toast.success("Field added");
+    } catch {
+      toast.error("Failed to add field");
+    }
+  };
+
+  const handleDelete = async (fieldId: string) => {
+    try {
+      await deleteFormFieldAsync({ fieldId });
+      toast.success("Field deleted");
+    } catch {
+      toast.error("Failed to delete field");
+    }
+  };
+
+  const startEdit = (field: { id: string; label: string; description?: string | null; isRequired: boolean }) => {
+    setEditingId(field.id);
+    setEditLabel(field.label);
+    setEditDescription(field.description ?? "");
+    setEditRequired(field.isRequired);
+  };
+
+  const handleSaveEdit = async (fieldId: string) => {
+    try {
+      await updateFormFieldAsync({
+        fieldId,
+        label: editLabel,
+        description: editDescription.trim() || undefined,
+        isRequired: editRequired,
+      });
+      setEditingId(null);
+      toast.success("Field updated");
+    } catch {
+      toast.error("Failed to update field");
+    }
+  };
+
+  const fieldTypeIcon = (type: FieldType) =>
+    FIELD_TYPES.find((t) => t.value === type)?.icon ?? <AlignLeft className="size-4" />;
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Add field panel */}
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <h2 className="mb-4 text-base font-semibold">Add a field</h2>
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="flex flex-col gap-1.5 flex-1 min-w-48">
+            <Label htmlFor="new-label">Label</Label>
+            <Input
+              id="new-label"
+              placeholder="e.g. Full Name"
+              value={newLabel}
+              onChange={(e) => setNewLabel(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddField()}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-48">
+            <Label htmlFor="new-description">Description</Label>
+            <Input
+              id="new-description"
+              placeholder="Optional description"
+              value={newDescription}
+              onChange={(e) => setNewDescription(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleAddField()}
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Type</Label>
+            <Select value={newType} onValueChange={(v) => setNewType(v as FieldType)}>
+              <SelectTrigger className="w-36">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FIELD_TYPES.map((t) => (
+                  <SelectItem key={t.value} value={t.value}>
+                    <span className="flex items-center gap-2">
+                      {t.icon}
+                      {t.label}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2 pb-1.5">
+            <Switch
+              id="new-required"
+              checked={newRequired}
+              onCheckedChange={setNewRequired}
+            />
+            <Label htmlFor="new-required" className="text-sm">
+              Required
+            </Label>
+          </div>
+          <Button onClick={handleAddField} disabled={isCreating}>
+            {isCreating ? (
+              <Loader2 className="size-4 animate-spin" />
+            ) : (
+              <Plus className="size-4" />
+            )}
+            Add Field
+          </Button>
+        </div>
+      </div>
+
+      {/* Field list */}
+      <div className="rounded-2xl border border-border bg-card p-5">
+        <h2 className="mb-4 text-base font-semibold">
+          Fields{" "}
+          <span className="text-muted-foreground font-normal text-sm">
+            ({fields?.length ?? 0})
+          </span>
+        </h2>
+
+        {isLoading && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground py-8 justify-center">
+            <Loader2 className="size-4 animate-spin" />
+            Loading fields...
+          </div>
+        )}
+
+        {!isLoading && (!fields || fields.length === 0) && (
+          <div className="rounded-xl border-2 border-dashed border-border py-12 text-center text-sm text-muted-foreground">
+            No fields yet. Add your first field above.
+          </div>
+        )}
+
+        {!isLoading && fields && fields.length > 0 && (
+          <div className="flex flex-col gap-2">
+            {fields.map((field, i) => (
+              <div key={field.id}>
+                {i > 0 && <Separator className="my-2" />}
+                {editingId === field.id ? (
+                  /* ── edit mode ── */
+                  <div className="flex flex-wrap items-end gap-3 py-1">
+                    <div className="flex flex-col gap-1.5 flex-1 min-w-40">
+                      <Label>Label</Label>
+                      <Input
+                        value={editLabel}
+                        onChange={(e) => setEditLabel(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(field.id)}
+                        autoFocus
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1.5 flex-1 min-w-40">
+                      <Label>Description</Label>
+                      <Input
+                        value={editDescription}
+                        onChange={(e) => setEditDescription(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && handleSaveEdit(field.id)}
+                      />
+                    </div>
+                    <div className="flex items-center gap-2 pb-1.5">
+                      <Switch
+                        id={`required-${field.id}`}
+                        checked={editRequired}
+                        onCheckedChange={setEditRequired}
+                      />
+                      <Label htmlFor={`required-${field.id}`} className="text-sm">
+                        Required
+                      </Label>
+                    </div>
+                    <div className="flex gap-2 pb-0.5">
+                      <Button size="sm" onClick={() => handleSaveEdit(field.id)}>
+                        Save
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setEditingId(null)}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  /* ── view mode ── */
+                  <div className="group flex items-center gap-3 rounded-lg px-2 py-2 hover:bg-muted/50 transition-colors">
+                    <GripVertical className="size-4 text-muted-foreground/40 shrink-0" />
+                    <span className="text-muted-foreground shrink-0">
+                      {fieldTypeIcon(field.type as FieldType)}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{field.label}</p>
+                      <p className="text-xs text-muted-foreground font-mono">{field.labelKey}</p>
+                    </div>
+                    <Badge variant="secondary" className="text-xs shrink-0">
+                      {field.type}
+                    </Badge>
+                    {field.isRequired && (
+                      <Badge variant="outline" className="text-xs shrink-0 border-destructive/50 text-destructive">
+                        Required
+                      </Badge>
+                    )}
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                      <Button
+                        size="icon-sm"
+                        variant="ghost"
+                        onClick={() =>
+                          startEdit({
+                            id: field.id,
+                            label: field.label,
+                            description: field.description,
+                            isRequired: field.isRequired,
+                          })
+                        }
+                      >
+                        <AlignLeft className="size-3.5" />
+                      </Button>
+                      <Button
+                        size="icon-sm"
+                        variant="ghost"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() => handleDelete(field.id)}
+                      >
+                        <Trash2 className="size-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="apps/web/app/dashboard/forms/[id]/submissions/_components/submissions-table.tsx">
+"use client";
+
+import { useGetFormFields, useGetFormSubmissions } from "~/hooks/api/form";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
+import { format } from "date-fns";
+
+export function SubmissionsTable({ formId }: { formId: string }) {
+  const { fields, isLoading: fieldsLoading, isError: fieldsError } = useGetFormFields(formId);
+  const { submissions, isLoading: subsLoading, isError: subsError } = useGetFormSubmissions(formId);
+
+  if (fieldsLoading || subsLoading) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+        <div className="text-sm text-muted-foreground">Loading submissions...</div>
+      </div>
+    );
+  }
+
+  if (fieldsError || subsError) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+        <div className="text-sm text-destructive">Failed to load submissions.</div>
+      </div>
+    );
+  }
+
+  if (!fields || fields.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+        <div className="text-sm text-muted-foreground">
+          This form has no fields. Add fields to start collecting submissions.
+        </div>
+      </div>
+    );
+  }
+
+  if (!submissions || submissions.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+        <div className="text-sm text-muted-foreground">
+          No submissions yet. Share the form to start receiving responses.
+        </div>
+      </div>
+    );
+  }
+
+  const fieldMap = new Map(fields.map((f) => [f.id, f.label]));
+
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 mt-6">
+      <h2 className="text-xl font-semibold mb-4">Submissions ({submissions.length})</h2>
+      <div className="rounded-md border overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {fields.map((field) => (
+                <TableHead key={field.id}>{field.label}</TableHead>
+              ))}
+              <TableHead className="text-right">Submitted At</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {submissions.map((submission) => {
+              const valueMap = new Map(
+                (submission.values ?? []).map((v) => [v.formFieldId, v.value])
+              );
+
+              return (
+                <TableRow key={submission.id}>
+                  {fields.map((field) => (
+                    <TableCell key={field.id} className="max-w-xs truncate">
+                      {valueMap.get(field.id) ?? "-"}
+                    </TableCell>
+                  ))}
+                  <TableCell className="text-right text-muted-foreground whitespace-nowrap">
+                    {submission.createdAt
+                      ? format(new Date(submission.createdAt), "MMM d, yyyy h:mm a")
+                      : "-"}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  );
+}
+</file>
+
+<file path="apps/web/app/dashboard/forms/[id]/submissions/page.tsx">
+import { SubmissionsTable } from "./_components/submissions-table";
+
+export default async function SubmissionsPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  return (
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <h1 className="text-3xl font-semibold">Submissions</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          View all submissions for this form.
+        </p>
+      </div>
+      <SubmissionsTable formId={id} />
+    </div>
+  );
+}
+</file>
+
+<file path="apps/web/app/dashboard/data.json">
+[
+  {
+    "id": 1,
+    "header": "Cover page",
+    "type": "Cover page",
+    "status": "In Process",
+    "target": "18",
+    "limit": "5",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 2,
+    "header": "Table of contents",
+    "type": "Table of contents",
+    "status": "Done",
+    "target": "29",
+    "limit": "24",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 3,
+    "header": "Executive summary",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "10",
+    "limit": "13",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 4,
+    "header": "Technical approach",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "27",
+    "limit": "23",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 5,
+    "header": "Design",
+    "type": "Narrative",
+    "status": "In Process",
+    "target": "2",
+    "limit": "16",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 6,
+    "header": "Capabilities",
+    "type": "Narrative",
+    "status": "In Process",
+    "target": "20",
+    "limit": "8",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 7,
+    "header": "Integration with existing systems",
+    "type": "Narrative",
+    "status": "In Process",
+    "target": "19",
+    "limit": "21",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 8,
+    "header": "Innovation and Advantages",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "25",
+    "limit": "26",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 9,
+    "header": "Overview of EMR's Innovative Solutions",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "7",
+    "limit": "23",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 10,
+    "header": "Advanced Algorithms and Machine Learning",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "30",
+    "limit": "28",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 11,
+    "header": "Adaptive Communication Protocols",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "9",
+    "limit": "31",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 12,
+    "header": "Advantages Over Current Technologies",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "12",
+    "limit": "0",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 13,
+    "header": "Past Performance",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "22",
+    "limit": "33",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 14,
+    "header": "Customer Feedback and Satisfaction Levels",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "15",
+    "limit": "34",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 15,
+    "header": "Implementation Challenges and Solutions",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "3",
+    "limit": "35",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 16,
+    "header": "Security Measures and Data Protection Policies",
+    "type": "Narrative",
+    "status": "In Process",
+    "target": "6",
+    "limit": "36",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 17,
+    "header": "Scalability and Future Proofing",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "4",
+    "limit": "37",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 18,
+    "header": "Cost-Benefit Analysis",
+    "type": "Plain language",
+    "status": "Done",
+    "target": "14",
+    "limit": "38",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 19,
+    "header": "User Training and Onboarding Experience",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "17",
+    "limit": "39",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 20,
+    "header": "Future Development Roadmap",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "11",
+    "limit": "40",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 21,
+    "header": "System Architecture Overview",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "24",
+    "limit": "18",
+    "reviewer": "Maya Johnson"
+  },
+  {
+    "id": 22,
+    "header": "Risk Management Plan",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "15",
+    "limit": "22",
+    "reviewer": "Carlos Rodriguez"
+  },
+  {
+    "id": 23,
+    "header": "Compliance Documentation",
+    "type": "Legal",
+    "status": "In Process",
+    "target": "31",
+    "limit": "27",
+    "reviewer": "Sarah Chen"
+  },
+  {
+    "id": 24,
+    "header": "API Documentation",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "8",
+    "limit": "12",
+    "reviewer": "Raj Patel"
+  },
+  {
+    "id": 25,
+    "header": "User Interface Mockups",
+    "type": "Visual",
+    "status": "In Process",
+    "target": "19",
+    "limit": "25",
+    "reviewer": "Leila Ahmadi"
+  },
+  {
+    "id": 26,
+    "header": "Database Schema",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "22",
+    "limit": "20",
+    "reviewer": "Thomas Wilson"
+  },
+  {
+    "id": 27,
+    "header": "Testing Methodology",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "17",
+    "limit": "14",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 28,
+    "header": "Deployment Strategy",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "26",
+    "limit": "30",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 29,
+    "header": "Budget Breakdown",
+    "type": "Financial",
+    "status": "In Process",
+    "target": "13",
+    "limit": "16",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 30,
+    "header": "Market Analysis",
+    "type": "Research",
+    "status": "Done",
+    "target": "29",
+    "limit": "32",
+    "reviewer": "Sophia Martinez"
+  },
+  {
+    "id": 31,
+    "header": "Competitor Comparison",
+    "type": "Research",
+    "status": "In Process",
+    "target": "21",
+    "limit": "19",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 32,
+    "header": "Maintenance Plan",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "16",
+    "limit": "23",
+    "reviewer": "Alex Thompson"
+  },
+  {
+    "id": 33,
+    "header": "User Personas",
+    "type": "Research",
+    "status": "In Process",
+    "target": "27",
+    "limit": "24",
+    "reviewer": "Nina Patel"
+  },
+  {
+    "id": 34,
+    "header": "Accessibility Compliance",
+    "type": "Legal",
+    "status": "Done",
+    "target": "18",
+    "limit": "21",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 35,
+    "header": "Performance Metrics",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "23",
+    "limit": "26",
+    "reviewer": "David Kim"
+  },
+  {
+    "id": 36,
+    "header": "Disaster Recovery Plan",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "14",
+    "limit": "17",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 37,
+    "header": "Third-party Integrations",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "25",
+    "limit": "28",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 38,
+    "header": "User Feedback Summary",
+    "type": "Research",
+    "status": "Done",
+    "target": "20",
+    "limit": "15",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 39,
+    "header": "Localization Strategy",
+    "type": "Narrative",
+    "status": "In Process",
+    "target": "12",
+    "limit": "19",
+    "reviewer": "Maria Garcia"
+  },
+  {
+    "id": 40,
+    "header": "Mobile Compatibility",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "28",
+    "limit": "31",
+    "reviewer": "James Wilson"
+  },
+  {
+    "id": 41,
+    "header": "Data Migration Plan",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "19",
+    "limit": "22",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 42,
+    "header": "Quality Assurance Protocols",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "30",
+    "limit": "33",
+    "reviewer": "Priya Singh"
+  },
+  {
+    "id": 43,
+    "header": "Stakeholder Analysis",
+    "type": "Research",
+    "status": "In Process",
+    "target": "11",
+    "limit": "14",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 44,
+    "header": "Environmental Impact Assessment",
+    "type": "Research",
+    "status": "Done",
+    "target": "24",
+    "limit": "27",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 45,
+    "header": "Intellectual Property Rights",
+    "type": "Legal",
+    "status": "In Process",
+    "target": "17",
+    "limit": "20",
+    "reviewer": "Sarah Johnson"
+  },
+  {
+    "id": 46,
+    "header": "Customer Support Framework",
+    "type": "Narrative",
+    "status": "Done",
+    "target": "22",
+    "limit": "25",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 47,
+    "header": "Version Control Strategy",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "15",
+    "limit": "18",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 48,
+    "header": "Continuous Integration Pipeline",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "26",
+    "limit": "29",
+    "reviewer": "Michael Chen"
+  },
+  {
+    "id": 49,
+    "header": "Regulatory Compliance",
+    "type": "Legal",
+    "status": "In Process",
+    "target": "13",
+    "limit": "16",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 50,
+    "header": "User Authentication System",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "28",
+    "limit": "31",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 51,
+    "header": "Data Analytics Framework",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "21",
+    "limit": "24",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 52,
+    "header": "Cloud Infrastructure",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "16",
+    "limit": "19",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 53,
+    "header": "Network Security Measures",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "29",
+    "limit": "32",
+    "reviewer": "Lisa Wong"
+  },
+  {
+    "id": 54,
+    "header": "Project Timeline",
+    "type": "Planning",
+    "status": "Done",
+    "target": "14",
+    "limit": "17",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 55,
+    "header": "Resource Allocation",
+    "type": "Planning",
+    "status": "In Process",
+    "target": "27",
+    "limit": "30",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 56,
+    "header": "Team Structure and Roles",
+    "type": "Planning",
+    "status": "Done",
+    "target": "20",
+    "limit": "23",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 57,
+    "header": "Communication Protocols",
+    "type": "Planning",
+    "status": "In Process",
+    "target": "15",
+    "limit": "18",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 58,
+    "header": "Success Metrics",
+    "type": "Planning",
+    "status": "Done",
+    "target": "30",
+    "limit": "33",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 59,
+    "header": "Internationalization Support",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "23",
+    "limit": "26",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 60,
+    "header": "Backup and Recovery Procedures",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "18",
+    "limit": "21",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 61,
+    "header": "Monitoring and Alerting System",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "25",
+    "limit": "28",
+    "reviewer": "Daniel Park"
+  },
+  {
+    "id": 62,
+    "header": "Code Review Guidelines",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "12",
+    "limit": "15",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 63,
+    "header": "Documentation Standards",
+    "type": "Technical content",
+    "status": "In Process",
+    "target": "27",
+    "limit": "30",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 64,
+    "header": "Release Management Process",
+    "type": "Planning",
+    "status": "Done",
+    "target": "22",
+    "limit": "25",
+    "reviewer": "Assign reviewer"
+  },
+  {
+    "id": 65,
+    "header": "Feature Prioritization Matrix",
+    "type": "Planning",
+    "status": "In Process",
+    "target": "19",
+    "limit": "22",
+    "reviewer": "Emma Davis"
+  },
+  {
+    "id": 66,
+    "header": "Technical Debt Assessment",
+    "type": "Technical content",
+    "status": "Done",
+    "target": "24",
+    "limit": "27",
+    "reviewer": "Eddie Lake"
+  },
+  {
+    "id": 67,
+    "header": "Capacity Planning",
+    "type": "Planning",
+    "status": "In Process",
+    "target": "21",
+    "limit": "24",
+    "reviewer": "Jamik Tashpulatov"
+  },
+  {
+    "id": 68,
+    "header": "Service Level Agreements",
+    "type": "Legal",
+    "status": "Done",
+    "target": "26",
+    "limit": "29",
+    "reviewer": "Assign reviewer"
+  }
+]
+</file>
+
+<file path="apps/web/app/dashboard/layout.tsx">
+import type { CSSProperties, ReactNode } from "react"
+
+import { AppSidebar } from "~/components/app-sidebar"
+import { SiteHeader } from "~/components/site-header"
+import {
+  SidebarInset,
+  SidebarProvider,
+} from "~/components/ui/sidebar"
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
+  return (
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            {children}
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  )
+}
+</file>
+
+<file path="apps/web/app/dashboard/page.tsx">
+import { ChartAreaInteractive } from "~/components/chart-area-interactive"
+import { DataTable } from "~/components/data-table"
+import { SectionCards } from "~/components/section-cards"
+
+import data from "./data.json"
+
+export default function DashboardPage() {
+  return (
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+      <SectionCards />
+      <div className="px-4 lg:px-6">
+        <ChartAreaInteractive />
+      </div>
+      <DataTable data={data} />
+    </div>
+  )
+}
+</file>
+
+<file path="apps/web/app/globals.css">
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+</file>
+
+<file path="apps/web/app/layout.tsx">
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import "./globals.css";
+import { GlobalProviders } from "~/providers/global";
+
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+});
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+});
+
+export const metadata: Metadata = {
+  title: "Streamyst",
+  description: "Media Forwarding",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className="dark">
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <GlobalProviders>{children}</GlobalProviders>
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="apps/web/hooks/use-mobile.ts">
+import * as React from "react"
+
+const MOBILE_BREAKPOINT = 768
+
+export function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+
+  React.useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const onChange = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    }
+    mql.addEventListener("change", onChange)
+    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+    return () => mql.removeEventListener("change", onChange)
+  }, [])
+
+  return !!isMobile
+}
+</file>
+
+<file path="apps/web/lib/utils.ts">
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+</file>
+
+<file path="apps/web/providers/global.tsx">
+"use client";
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeProvider as NextThemesProvider } from "next-themes";
+import React, { useState } from "react";
+// import { Toaster } from "~/components/ui/sonner";
+
+import { trpc } from "~/trpc/client";
+import { createTRPCHttpBatchClientClient } from "~/trpc/create-client";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnMount: true,
+      staleTime: Infinity,
+    },
+  },
+});
+
+export const GlobalProviders: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [trpcClient] = useState(() =>
+    trpc.createClient({
+      links: [createTRPCHttpBatchClientClient()],
+    }),
+  );
+  return (
+    <QueryClientProvider client={queryClient}>
+      <NextThemesProvider
+        attribute="class"
+        defaultTheme="light"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <trpc.Provider queryClient={queryClient} client={trpcClient}>
+          {children}
+          {/* <Toaster /> */}
+        </trpc.Provider>
+      </NextThemesProvider>
+    </QueryClientProvider>
+  );
+};
+</file>
+
+<file path="apps/web/public/file-text.svg">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M14.5 13.5V6.5V5.41421C14.5 5.149 14.3946 4.89464 14.2071 4.70711L9.79289 0.292893C9.60536 0.105357 9.351 0 9.08579 0H8H3H1.5V1.5V13.5C1.5 14.8807 2.61929 16 4 16H12C13.3807 16 14.5 14.8807 14.5 13.5ZM13 13.5V6.5H9.5H8V5V1.5H3V13.5C3 14.0523 3.44772 14.5 4 14.5H12C12.5523 14.5 13 14.0523 13 13.5ZM9.5 5V2.12132L12.3787 5H9.5ZM5.13 5.00062H4.505V6.25062H5.13H6H6.625V5.00062H6H5.13ZM4.505 8H5.13H11H11.625V9.25H11H5.13H4.505V8ZM5.13 11H4.505V12.25H5.13H11H11.625V11H11H5.13Z" fill="#666666"/>
+</svg>
+</file>
+
+<file path="apps/web/public/globe.svg">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_868_525)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M10.268 14.0934C11.9051 13.4838 13.2303 12.2333 13.9384 10.6469C13.1192 10.7941 12.2138 10.9111 11.2469 10.9925C11.0336 12.2005 10.695 13.2621 10.268 14.0934ZM8 16C12.4183 16 16 12.4183 16 8C16 3.58172 12.4183 0 8 0C3.58172 0 0 3.58172 0 8C0 12.4183 3.58172 16 8 16ZM8.48347 14.4823C8.32384 14.494 8.16262 14.5 8 14.5C7.83738 14.5 7.67616 14.494 7.51654 14.4823C7.5132 14.4791 7.50984 14.4759 7.50647 14.4726C7.2415 14.2165 6.94578 13.7854 6.67032 13.1558C6.41594 12.5744 6.19979 11.8714 6.04101 11.0778C6.67605 11.1088 7.33104 11.125 8 11.125C8.66896 11.125 9.32395 11.1088 9.95899 11.0778C9.80021 11.8714 9.58406 12.5744 9.32968 13.1558C9.05422 13.7854 8.7585 14.2165 8.49353 14.4726C8.49016 14.4759 8.4868 14.4791 8.48347 14.4823ZM11.4187 9.72246C12.5137 9.62096 13.5116 9.47245 14.3724 9.28806C14.4561 8.87172 14.5 8.44099 14.5 8C14.5 7.55901 14.4561 7.12828 14.3724 6.71194C13.5116 6.52755 12.5137 6.37904 11.4187 6.27753C11.4719 6.83232 11.5 7.40867 11.5 8C11.5 8.59133 11.4719 9.16768 11.4187 9.72246ZM10.1525 6.18401C10.2157 6.75982 10.25 7.36805 10.25 8C10.25 8.63195 10.2157 9.24018 10.1525 9.81598C9.46123 9.85455 8.7409 9.875 8 9.875C7.25909 9.875 6.53877 9.85455 5.84749 9.81598C5.7843 9.24018 5.75 8.63195 5.75 8C5.75 7.36805 5.7843 6.75982 5.84749 6.18401C6.53877 6.14545 7.25909 6.125 8 6.125C8.74091 6.125 9.46123 6.14545 10.1525 6.18401ZM11.2469 5.00748C12.2138 5.08891 13.1191 5.20593 13.9384 5.35306C13.2303 3.7667 11.9051 2.51622 10.268 1.90662C10.695 2.73788 11.0336 3.79953 11.2469 5.00748ZM8.48347 1.51771C8.4868 1.52089 8.49016 1.52411 8.49353 1.52737C8.7585 1.78353 9.05422 2.21456 9.32968 2.84417C9.58406 3.42562 9.80021 4.12856 9.95899 4.92219C9.32395 4.89118 8.66896 4.875 8 4.875C7.33104 4.875 6.67605 4.89118 6.04101 4.92219C6.19978 4.12856 6.41594 3.42562 6.67032 2.84417C6.94578 2.21456 7.2415 1.78353 7.50647 1.52737C7.50984 1.52411 7.51319 1.52089 7.51653 1.51771C7.67615 1.50597 7.83738 1.5 8 1.5C8.16262 1.5 8.32384 1.50597 8.48347 1.51771ZM5.73202 1.90663C4.0949 2.51622 2.76975 3.7667 2.06159 5.35306C2.88085 5.20593 3.78617 5.08891 4.75309 5.00748C4.96639 3.79953 5.30497 2.73788 5.73202 1.90663ZM4.58133 6.27753C3.48633 6.37904 2.48837 6.52755 1.62761 6.71194C1.54392 7.12828 1.5 7.55901 1.5 8C1.5 8.44099 1.54392 8.87172 1.62761 9.28806C2.48837 9.47245 3.48633 9.62096 4.58133 9.72246C4.52807 9.16768 4.5 8.59133 4.5 8C4.5 7.40867 4.52807 6.83232 4.58133 6.27753ZM4.75309 10.9925C3.78617 10.9111 2.88085 10.7941 2.06159 10.6469C2.76975 12.2333 4.0949 13.4838 5.73202 14.0934C5.30497 13.2621 4.96639 12.2005 4.75309 10.9925Z" fill="#666666"/>
+</g>
+<defs>
+<clipPath id="clip0_868_525">
+<rect width="16" height="16" fill="white"/>
+</clipPath>
+</defs>
+</svg>
+</file>
+
+<file path="apps/web/public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="apps/web/public/turborepo-dark.svg">
+<svg width="473" height="76" viewBox="0 0 473 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M130.998 30.6565V22.3773H91.0977V30.6565H106.16V58.1875H115.935V30.6565H130.998Z" fill="black"/>
+<path d="M153.542 58.7362C165.811 58.7362 172.544 52.5018 172.544 42.2275V22.3773H162.768V41.2799C162.768 47.0155 159.776 50.2574 153.542 50.2574C147.307 50.2574 144.315 47.0155 144.315 41.2799V22.3773H134.539V42.2275C134.539 52.5018 141.272 58.7362 153.542 58.7362Z" fill="black"/>
+<path d="M187.508 46.3173H197.234L204.914 58.1875H216.136L207.458 45.2699C212.346 43.5243 215.338 39.634 215.338 34.3473C215.338 26.6665 209.603 22.3773 200.874 22.3773H177.732V58.1875H187.508V46.3173ZM187.508 38.5867V30.5568H200.376C203.817 30.5568 205.712 32.053 205.712 34.5967C205.712 36.9907 203.817 38.5867 200.376 38.5867H187.508Z" fill="black"/>
+<path d="M219.887 58.1875H245.472C253.452 58.1875 258.041 54.397 258.041 48.0629C258.041 43.8235 255.348 40.9308 252.156 39.634C254.35 38.5867 257.043 36.0929 257.043 32.1528C257.043 25.8187 252.555 22.3773 244.625 22.3773H219.887V58.1875ZM229.263 36.3922V30.3074H243.627C246.32 30.3074 247.817 31.3548 247.817 33.3498C247.817 35.3448 246.32 36.3922 243.627 36.3922H229.263ZM229.263 43.7238H244.525C247.168 43.7238 248.615 45.0205 248.615 46.9657C248.615 48.9108 247.168 50.2075 244.525 50.2075H229.263V43.7238Z" fill="black"/>
+<path d="M281.942 21.7788C269.423 21.7788 260.396 29.6092 260.396 40.2824C260.396 50.9557 269.423 58.786 281.942 58.786C294.461 58.786 303.438 50.9557 303.438 40.2824C303.438 29.6092 294.461 21.7788 281.942 21.7788ZM281.942 30.2575C288.525 30.2575 293.463 34.1478 293.463 40.2824C293.463 46.417 288.525 50.3073 281.942 50.3073C275.359 50.3073 270.421 46.417 270.421 40.2824C270.421 34.1478 275.359 30.2575 281.942 30.2575Z" fill="black"/>
+<path d="M317.526 46.3173H327.251L334.932 58.1875H346.154L337.476 45.2699C342.364 43.5243 345.356 39.634 345.356 34.3473C345.356 26.6665 339.62 22.3773 330.892 22.3773H307.75V58.1875H317.526V46.3173ZM317.526 38.5867V30.5568H330.394C333.835 30.5568 335.73 32.053 335.73 34.5967C335.73 36.9907 333.835 38.5867 330.394 38.5867H317.526Z" fill="black"/>
+<path d="M349.904 22.3773V58.1875H384.717V49.9083H359.48V44.0729H381.874V35.9932H359.48V30.6565H384.717V22.3773H349.904Z" fill="black"/>
+<path d="M399.204 46.7662H412.221C420.95 46.7662 426.685 42.5767 426.685 34.5967C426.685 26.5668 420.95 22.3773 412.221 22.3773H389.428V58.1875H399.204V46.7662ZM399.204 38.6365V30.5568H411.673C415.164 30.5568 417.059 32.053 417.059 34.5967C417.059 37.0904 415.164 38.6365 411.673 38.6365H399.204Z" fill="black"/>
+<path d="M450.948 21.7788C438.43 21.7788 429.402 29.6092 429.402 40.2824C429.402 50.9557 438.43 58.786 450.948 58.786C463.467 58.786 472.444 50.9557 472.444 40.2824C472.444 29.6092 463.467 21.7788 450.948 21.7788ZM450.948 30.2575C457.532 30.2575 462.469 34.1478 462.469 40.2824C462.469 46.417 457.532 50.3073 450.948 50.3073C444.365 50.3073 439.427 46.417 439.427 40.2824C439.427 34.1478 444.365 30.2575 450.948 30.2575Z" fill="black"/>
+<path d="M38.5017 18.0956C27.2499 18.0956 18.0957 27.2498 18.0957 38.5016C18.0957 49.7534 27.2499 58.9076 38.5017 58.9076C49.7535 58.9076 58.9077 49.7534 58.9077 38.5016C58.9077 27.2498 49.7535 18.0956 38.5017 18.0956ZM38.5017 49.0618C32.6687 49.0618 27.9415 44.3346 27.9415 38.5016C27.9415 32.6686 32.6687 27.9414 38.5017 27.9414C44.3347 27.9414 49.0619 32.6686 49.0619 38.5016C49.0619 44.3346 44.3347 49.0618 38.5017 49.0618Z" fill="black"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M40.2115 14.744V7.125C56.7719 8.0104 69.9275 21.7208 69.9275 38.5016C69.9275 55.2824 56.7719 68.989 40.2115 69.8782V62.2592C52.5539 61.3776 62.3275 51.0644 62.3275 38.5016C62.3275 25.9388 52.5539 15.6256 40.2115 14.744ZM20.5048 54.0815C17.233 50.3043 15.124 45.4935 14.7478 40.2115H7.125C7.5202 47.6025 10.4766 54.3095 15.1088 59.4737L20.501 54.0815H20.5048ZM36.7916 69.8782V62.2592C31.5058 61.883 26.695 59.7778 22.9178 56.5022L17.5256 61.8944C22.6936 66.5304 29.4006 69.483 36.7878 69.8782H36.7916Z" fill="url(#paint0_linear_2028_278)"/>
+<defs>
+<linearGradient id="paint0_linear_2028_278" x1="41.443" y1="11.5372" x2="10.5567" y2="42.4236" gradientUnits="userSpaceOnUse">
+<stop stop-color="#0096FF"/>
+<stop offset="1" stop-color="#FF1E56"/>
+</linearGradient>
+</defs>
+</svg>
+</file>
+
+<file path="apps/web/public/turborepo-light.svg">
+<svg width="473" height="76" viewBox="0 0 473 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M130.998 30.6566V22.3773H91.0977V30.6566H106.16V58.1876H115.935V30.6566H130.998Z" fill="white"/>
+<path d="M153.542 58.7362C165.811 58.7362 172.544 52.5018 172.544 42.2276V22.3773H162.768V41.2799C162.768 47.0156 159.776 50.2574 153.542 50.2574C147.307 50.2574 144.315 47.0156 144.315 41.2799V22.3773H134.539V42.2276C134.539 52.5018 141.272 58.7362 153.542 58.7362Z" fill="white"/>
+<path d="M187.508 46.3173H197.234L204.914 58.1876H216.136L207.458 45.2699C212.346 43.5243 215.338 39.6341 215.338 34.3473C215.338 26.6666 209.603 22.3773 200.874 22.3773H177.732V58.1876H187.508V46.3173ZM187.508 38.5867V30.5568H200.376C203.817 30.5568 205.712 32.0531 205.712 34.5967C205.712 36.9907 203.817 38.5867 200.376 38.5867H187.508Z" fill="white"/>
+<path d="M219.887 58.1876H245.472C253.452 58.1876 258.041 54.3971 258.041 48.0629C258.041 43.8236 255.348 40.9308 252.156 39.6341C254.35 38.5867 257.043 36.0929 257.043 32.1528C257.043 25.8187 252.555 22.3773 244.625 22.3773H219.887V58.1876ZM229.263 36.3922V30.3074H243.627C246.32 30.3074 247.817 31.3548 247.817 33.3498C247.817 35.3448 246.32 36.3922 243.627 36.3922H229.263ZM229.263 43.7238H244.525C247.168 43.7238 248.615 45.0206 248.615 46.9657C248.615 48.9108 247.168 50.2076 244.525 50.2076H229.263V43.7238Z" fill="white"/>
+<path d="M281.942 21.7788C269.423 21.7788 260.396 29.6092 260.396 40.2824C260.396 50.9557 269.423 58.7861 281.942 58.7861C294.461 58.7861 303.438 50.9557 303.438 40.2824C303.438 29.6092 294.461 21.7788 281.942 21.7788ZM281.942 30.2576C288.525 30.2576 293.463 34.1478 293.463 40.2824C293.463 46.4171 288.525 50.3073 281.942 50.3073C275.359 50.3073 270.421 46.4171 270.421 40.2824C270.421 34.1478 275.359 30.2576 281.942 30.2576Z" fill="white"/>
+<path d="M317.526 46.3173H327.251L334.932 58.1876H346.154L337.476 45.2699C342.364 43.5243 345.356 39.6341 345.356 34.3473C345.356 26.6666 339.62 22.3773 330.892 22.3773H307.75V58.1876H317.526V46.3173ZM317.526 38.5867V30.5568H330.394C333.835 30.5568 335.73 32.0531 335.73 34.5967C335.73 36.9907 333.835 38.5867 330.394 38.5867H317.526Z" fill="white"/>
+<path d="M349.904 22.3773V58.1876H384.717V49.9083H359.48V44.0729H381.874V35.9932H359.48V30.6566H384.717V22.3773H349.904Z" fill="white"/>
+<path d="M399.204 46.7662H412.221C420.95 46.7662 426.685 42.5767 426.685 34.5967C426.685 26.5668 420.95 22.3773 412.221 22.3773H389.428V58.1876H399.204V46.7662ZM399.204 38.6366V30.5568H411.673C415.164 30.5568 417.059 32.0531 417.059 34.5967C417.059 37.0904 415.164 38.6366 411.673 38.6366H399.204Z" fill="white"/>
+<path d="M450.948 21.7788C438.43 21.7788 429.402 29.6092 429.402 40.2824C429.402 50.9557 438.43 58.7861 450.948 58.7861C463.467 58.7861 472.444 50.9557 472.444 40.2824C472.444 29.6092 463.467 21.7788 450.948 21.7788ZM450.948 30.2576C457.532 30.2576 462.469 34.1478 462.469 40.2824C462.469 46.4171 457.532 50.3073 450.948 50.3073C444.365 50.3073 439.427 46.4171 439.427 40.2824C439.427 34.1478 444.365 30.2576 450.948 30.2576Z" fill="white"/>
+<path d="M38.5017 18.0956C27.2499 18.0956 18.0957 27.2498 18.0957 38.5016C18.0957 49.7534 27.2499 58.9076 38.5017 58.9076C49.7535 58.9076 58.9077 49.7534 58.9077 38.5016C58.9077 27.2498 49.7535 18.0956 38.5017 18.0956ZM38.5017 49.0618C32.6687 49.0618 27.9415 44.3346 27.9415 38.5016C27.9415 32.6686 32.6687 27.9414 38.5017 27.9414C44.3347 27.9414 49.0619 32.6686 49.0619 38.5016C49.0619 44.3346 44.3347 49.0618 38.5017 49.0618Z" fill="white"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M40.2115 14.744V7.125C56.7719 8.0104 69.9275 21.7208 69.9275 38.5016C69.9275 55.2824 56.7719 68.989 40.2115 69.8782V62.2592C52.5539 61.3776 62.3275 51.0644 62.3275 38.5016C62.3275 25.9388 52.5539 15.6256 40.2115 14.744ZM20.5048 54.0815C17.233 50.3043 15.124 45.4935 14.7478 40.2115H7.125C7.5202 47.6025 10.4766 54.3095 15.1088 59.4737L20.501 54.0815H20.5048ZM36.7916 69.8782V62.2592C31.5058 61.883 26.695 59.7778 22.9178 56.5022L17.5256 61.8944C22.6936 66.5304 29.4006 69.483 36.7878 69.8782H36.7916Z" fill="url(#paint0_linear_2028_477)"/>
+<defs>
+<linearGradient id="paint0_linear_2028_477" x1="41.443" y1="11.5372" x2="10.5567" y2="42.4236" gradientUnits="userSpaceOnUse">
+<stop stop-color="#0096FF"/>
+<stop offset="1" stop-color="#FF1E56"/>
+</linearGradient>
+</defs>
+</svg>
+</file>
+
+<file path="apps/web/public/vercel.svg">
+<svg width="21" height="20" viewBox="0 0 21 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_977_547)">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M10.5 3L18.5 17H2.5L10.5 3Z" fill="white"/>
+</g>
+<defs>
+<clipPath id="clip0_977_547">
+<rect width="16" height="16" fill="white" transform="translate(2.5 2)"/>
+</clipPath>
+</defs>
+</svg>
+</file>
+
+<file path="apps/web/public/window.svg">
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5H14.5V12.5C14.5 13.0523 14.0523 13.5 13.5 13.5H2.5C1.94772 13.5 1.5 13.0523 1.5 12.5V2.5ZM0 1H1.5H14.5H16V2.5V12.5C16 13.8807 14.8807 15 13.5 15H2.5C1.11929 15 0 13.8807 0 12.5V2.5V1ZM3.75 5.5C4.16421 5.5 4.5 5.16421 4.5 4.75C4.5 4.33579 4.16421 4 3.75 4C3.33579 4 3 4.33579 3 4.75C3 5.16421 3.33579 5.5 3.75 5.5ZM7 4.75C7 5.16421 6.66421 5.5 6.25 5.5C5.83579 5.5 5.5 5.16421 5.5 4.75C5.5 4.33579 5.83579 4 6.25 4C6.66421 4 7 4.33579 7 4.75ZM8.75 5.5C9.16421 5.5 9.5 5.16421 9.5 4.75C9.5 4.33579 9.16421 4 8.75 4C8.33579 4 8 4.33579 8 4.75C8 5.16421 8.33579 5.5 8.75 5.5Z" fill="#666666"/>
+</svg>
+</file>
+
+<file path="apps/web/trpc/client.ts">
+import { createTRPCReact } from "@trpc/react-query";
+import { ServerRouter } from "@repo/trpc/client";
+
+export const trpc = createTRPCReact<ServerRouter>();
+</file>
+
+<file path="apps/web/trpc/server.ts">
+import type { ServerRouter } from "@repo/trpc/client";
+import { createTRPCProxyClient } from "@repo/trpc/client";
+import { createTRPCHttpBatchClientClient } from "~/trpc/create-client";
+
+export const api = createTRPCProxyClient<ServerRouter>({
+  links: [createTRPCHttpBatchClientClient()],
+});
+
+export const apiStreaming = createTRPCProxyClient<ServerRouter>({
+  links: [createTRPCHttpBatchClientClient({ enableStreaming: true })],
+});
+</file>
+
+<file path="apps/web/.gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env files (can opt-in for commiting if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="apps/web/components.json">
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "",
+    "css": "app/globals.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "~/components",
+    "utils": "~/lib/utils",
+    "ui": "~/components/ui",
+    "lib": "~/lib",
+    "hooks": "~/hooks"
+  },
+  "registries": {}
+}
+</file>
+
+<file path="apps/web/env.js">
+import { createEnv } from "@t3-oss/env-nextjs";
+import { z } from "zod";
+
+export const env = createEnv({
+  /**
+   * Specify your server-side environment variables schema here. This way you can ensure the app
+   * isn't built with invalid env vars.
+   */
+  server: {},
+
+  /**
+   * Specify your client-side environment variables schema here. This way you can ensure the app
+   * isn't built with invalid env vars. To expose them to the client, prefix them with
+   * `NEXT_PUBLIC_`.
+   */
+  client: {
+    NEXT_PUBLIC_API_URL: z.string().optional(),
+  },
+
+  /**
+   * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
+   * middlewares) or client-side so we need to destruct manually.
+   */
+  runtimeEnv: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+  },
+  /**
+   * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
+   * useful for Docker builds.
+   */
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
+  /**
+   * Makes it so that empty strings are treated as undefined. `SOME_VAR: z.string()` and
+   * `SOME_VAR=''` will throw an error.
+   */
+  emptyStringAsUndefined: true,
+});
+</file>
+
+<file path="apps/web/eslint.config.js">
+import { nextJsConfig } from "@repo/eslint-config/next-js";
+
+/** @type {import("eslint").Linter.Config[]} */
+export default nextJsConfig;
+</file>
+
+<file path="apps/web/next.config.js">
+/** @type {import('next').NextConfig} */
+const nextConfig = {};
+
+export default nextConfig;
+</file>
+
+<file path="apps/web/postcss.config.mjs">
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+export default config;
+</file>
+
+<file path="apps/web/README.md">
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/create-next-app).
+
+## Getting Started
+
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load Inter, a custom Google Font.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+</file>
+
+<file path="apps/web/tsconfig.json">
+{
+  "extends": "@repo/typescript-config/nextjs.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./*"]
+    },
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts",
+    "next.config.js",
+    ".next/types/**/*.ts"
+  ],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path="packages/database/models/form_field.ts">
+import { pgTable, uuid, varchar, timestamp, boolean, text, numeric, pgEnum, unique } from "drizzle-orm/pg-core";
+import { formsTable } from "./form";
+
+export const fieldTypeEnum = pgEnum("field_type_enum", ["TEXT", "NUMBER", "EMAIL", "YES_NO", "PASSWORD"])
+
+export const formFieldsTable = pgTable("form_fileds", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  label: varchar("label", { length: 100 }).notNull(),
+  labelKey: varchar("label_key", { length: 100 }).notNull(),
+
+  description: text("description"),
+
+  placeholeder: text("placeholder"),
+
+  isRequired: boolean("is_required").default(false).notNull(),
+
+  index: numeric("index", { scale: 2 }).notNull(),
+
+  type: fieldTypeEnum("type").notNull(),
+  
+  formId: uuid("form_id").references(() => formsTable.id),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+}, (table)=>{
+    return {
+        uniqueFormIdAndIndex: unique().on(table.formId, table.index)
+    }
+});
+</file>
+
+<file path="packages/database/models/form.ts">
+import { pgTable, uuid, varchar, timestamp, boolean, text } from "drizzle-orm/pg-core";
+import { usersTable } from "./user";
+
+export const formsTable = pgTable("forms", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  title: varchar("title", { length: 55 }).notNull(),
+  description: varchar("description", { length: 30 }),
+
+  createdBy: uuid("created_by").references(() => usersTable.id),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+});
+</file>
+
+<file path="packages/database/.eslintrc.cjs">
+/** @type {import("eslint").Linter.Config} */
+const config = {
+  extends: ["@repo/eslint-config/node.js"],
+};
+
+module.exports = config;
+</file>
+
+<file path="packages/database/drizzle.config.ts">
+import "dotenv/config";
+import { defineConfig } from "drizzle-kit";
+import { env } from "./env";
+
+export default defineConfig({
+  out: "./drizzle",
+  schema: "./schema.ts",
+  dialect: "postgresql",
+  dbCredentials: {
+    url: env.DATABASE_URL,
+  },
+});
+</file>
+
+<file path="packages/database/env.ts">
+import { z } from "zod";
+
+const envSchema = z.object({
+  DATABASE_URL: z.string().describe("DB URL"),
+});
+
+function createEnv(env: NodeJS.ProcessEnv) {
+  const safeParseResult = envSchema.safeParse(env);
+  if (!safeParseResult.success) throw new Error(safeParseResult.error.message);
+  return safeParseResult.data;
+}
+
+export const env = createEnv(process.env);
+</file>
+
+<file path="packages/database/index.ts">
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { env } from "./env";
+
+export const db = drizzle(env.DATABASE_URL);
+export * from "drizzle-orm";
+export default db;
+</file>
+
+<file path="packages/database/package.json">
+{
+  "name": "@repo/database",
+  "version": "1.0.0",
+  "scripts": {
+    "db:migrate": "dotenv -- drizzle-kit migrate",
+    "db:generate": "dotenv -- drizzle-kit generate",
+    "dev": "dotenv -- drizzle-kit studio"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/pg": "^8.16.0",
+    "dotenv-cli": "^11.0.0",
+    "drizzle-kit": "^0.31.8",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.1",
+    "pg": "^8.16.3",
+    "zod": "^4.3.5"
+  }
+}
+</file>
+
+<file path="packages/database/tsconfig.json">
+{
+  "extends": ["@repo/typescript-config/node.json"]
+}
+</file>
+
+<file path="packages/eslint-config/base.js">
+import js from "@eslint/js";
+import eslintConfigPrettier from "eslint-config-prettier";
+import turboPlugin from "eslint-plugin-turbo";
+import tseslint from "typescript-eslint";
+import onlyWarn from "eslint-plugin-only-warn";
+
+/**
+ * A shared ESLint configuration for the repository.
+ *
+ * @type {import("eslint").Linter.Config[]}
+ * */
+export const config = [
+  js.configs.recommended,
+  eslintConfigPrettier,
+  ...tseslint.configs.recommended,
+  {
+    plugins: {
+      turbo: turboPlugin,
+    },
+    rules: {
+      "turbo/no-undeclared-env-vars": "warn",
+    },
+  },
+  {
+    plugins: {
+      onlyWarn,
+    },
+  },
+  {
+    ignores: ["dist/**"],
+  },
+];
+</file>
+
+<file path="packages/eslint-config/next.js">
+import js from "@eslint/js";
+import { globalIgnores } from "eslint/config";
+import eslintConfigPrettier from "eslint-config-prettier";
+import tseslint from "typescript-eslint";
+import pluginReactHooks from "eslint-plugin-react-hooks";
+import pluginReact from "eslint-plugin-react";
+import globals from "globals";
+import pluginNext from "@next/eslint-plugin-next";
+import { config as baseConfig } from "./base.js";
+
+/**
+ * A custom ESLint configuration for libraries that use Next.js.
+ *
+ * @type {import("eslint").Linter.Config[]}
+ * */
+export const nextJsConfig = [
+  ...baseConfig,
+  js.configs.recommended,
+  eslintConfigPrettier,
+  ...tseslint.configs.recommended,
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+  {
+    ...pluginReact.configs.flat.recommended,
+    languageOptions: {
+      ...pluginReact.configs.flat.recommended.languageOptions,
+      globals: {
+        ...globals.serviceworker,
+      },
+    },
+  },
+  {
+    plugins: {
+      "@next/next": pluginNext,
+    },
+    rules: {
+      ...pluginNext.configs.recommended.rules,
+      ...pluginNext.configs["core-web-vitals"].rules,
+    },
+  },
+  {
+    plugins: {
+      "react-hooks": pluginReactHooks,
+    },
+    settings: { react: { version: "detect" } },
+    rules: {
+      ...pluginReactHooks.configs.recommended.rules,
+      // React scope no longer necessary with new JSX transform.
+      "react/react-in-jsx-scope": "off",
+    },
+  },
+];
+</file>
+
+<file path="packages/eslint-config/package.json">
+{
+  "name": "@repo/eslint-config",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "exports": {
+    "./base": "./base.js",
+    "./next-js": "./next.js",
+    "./react-internal": "./react-internal.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "@next/eslint-plugin-next": "^15.5.0",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-only-warn": "^1.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-turbo": "^2.7.1",
+    "globals": "^16.5.0",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.50.0"
+  }
+}
+</file>
+
+<file path="packages/eslint-config/react-internal.js">
+import js from "@eslint/js";
+import eslintConfigPrettier from "eslint-config-prettier";
+import tseslint from "typescript-eslint";
+import pluginReactHooks from "eslint-plugin-react-hooks";
+import pluginReact from "eslint-plugin-react";
+import globals from "globals";
+import { config as baseConfig } from "./base.js";
+
+/**
+ * A custom ESLint configuration for libraries that use React.
+ *
+ * @type {import("eslint").Linter.Config[]} */
+export const config = [
+  ...baseConfig,
+  js.configs.recommended,
+  eslintConfigPrettier,
+  ...tseslint.configs.recommended,
+  pluginReact.configs.flat.recommended,
+  {
+    languageOptions: {
+      ...pluginReact.configs.flat.recommended.languageOptions,
+      globals: {
+        ...globals.serviceworker,
+        ...globals.browser,
+      },
+    },
+  },
+  {
+    plugins: {
+      "react-hooks": pluginReactHooks,
+    },
+    settings: { react: { version: "detect" } },
+    rules: {
+      ...pluginReactHooks.configs.recommended.rules,
+      // React scope no longer necessary with new JSX transform.
+      "react/react-in-jsx-scope": "off",
+    },
+  },
+];
+</file>
+
+<file path="packages/eslint-config/README.md">
+# `@turbo/eslint-config`
+
+Collection of internal eslint configurations.
+</file>
+
+<file path="packages/logger/.eslintrc.cjs">
+/** @type {import("eslint").Linter.Config} */
+const config = {
+  extends: ["@repo/eslint-config/node.js"],
+};
+
+module.exports = config;
+</file>
+
+<file path="packages/logger/env.ts">
+import { z } from "zod";
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(["development", "prod"]).default("development"),
+  LOGGER_LEVEL: z.enum(["error", "debug", "info"]).optional(),
+});
+
+function createEnv(env: NodeJS.ProcessEnv) {
+  const safeParseResult = envSchema.safeParse(env);
+  if (!safeParseResult.success) throw new Error(safeParseResult.error.message);
+  return safeParseResult.data;
+}
+
+export const env = createEnv(process.env);
+</file>
+
+<file path="packages/logger/index.ts">
+import winston from "winston";
+import { env } from "./env";
+
+type LoggerLevel = "error" | "info" | "debug";
+
+const level: LoggerLevel =
+  env.LOGGER_LEVEL ?? (env.NODE_ENV === "development" ? "debug" : "error");
+
+const isDevelopment = env.NODE_ENV === "development";
+
+const format = isDevelopment
+  ? winston.format.combine(
+      winston.format.colorize(),
+      winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+      winston.format.printf(({ timestamp, level, message, ...meta }) => {
+        const metaString = Object.keys(meta).length
+          ? `\n${JSON.stringify(meta, null, 2)}`
+          : "";
+        return `${timestamp} [${level}]: ${message}${metaString}`;
+      }),
+    )
+  : winston.format.combine(winston.format.timestamp(), winston.format.json());
+
+export const logger = winston.createLogger({
+  level: level,
+  format: format,
+  transports: [new winston.transports.Console()],
+});
+</file>
+
+<file path="packages/logger/package.json">
+{
+  "name": "@repo/logger",
+  "version": "1.0.0",
+  "scripts": {},
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "winston": "^3.19.0",
+    "zod": "^4.3.5"
+  }
+}
+</file>
+
+<file path="packages/logger/tsconfig.json">
+{
+  "extends": ["@repo/typescript-config/node.json"]
+}
+</file>
+
+<file path="packages/services/form-submission/index.ts">
+import { db, eq, desc } from "@repo/database";
+import { formSubmissionsTable } from "@repo/database/models/form_submission";
+import {
+  CreateFormSubmissionInputType,
+  createFormSubmissionInput,
+  GetFormSubmissionsInputType,
+  getFormSubmissionsInput,
+} from "./model";
+
+class FormSubmissionService {
+  public async createSubmission(payload: CreateFormSubmissionInputType) {
+    const { formId, values } = await createFormSubmissionInput.parseAsync(payload);
+
+    const insertResult = await db
+      .insert(formSubmissionsTable)
+      .values({ formId, values })
+      .returning({ id: formSubmissionsTable.id });
+
+    const result = insertResult[0];
+    if (!result || !result.id) {
+      throw new Error("Something went wrong while creating submission");
+    }
+
+    return result;
+  }
+
+  public async getSubmissions(payload: GetFormSubmissionsInputType) {
+    const { formId } = await getFormSubmissionsInput.parseAsync(payload);
+
+    const submissions = await db
+      .select()
+      .from(formSubmissionsTable)
+      .where(eq(formSubmissionsTable.formId, formId))
+      .orderBy(desc(formSubmissionsTable.createdAt));
+
+    return submissions;
+  }
+}
+
+export default FormSubmissionService;
+</file>
+
+<file path="packages/services/form-submission/model.ts">
+import { z } from "zod";
+
+export const formSubmissionValueSchema = z.object({
+  formFieldId: z.string().uuid(),
+  value: z.string(),
+});
+
+export const createFormSubmissionInput = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+  values: z.array(formSubmissionValueSchema).describe("Array of field submissions"),
+});
+
+export type CreateFormSubmissionInputType = z.infer<typeof createFormSubmissionInput>;
+
+export const getFormSubmissionsInput = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+});
+
+export type GetFormSubmissionsInputType = z.infer<typeof getFormSubmissionsInput>;
+</file>
+
+<file path="packages/services/.eslintrc.cjs">
+/** @type {import("eslint").Linter.Config} */
+const config = {
+  extends: ["@repo/eslint-config/node.js"],
+};
+
+module.exports = config;
+</file>
+
+<file path="packages/services/tsconfig.json">
+{
+  "extends": ["@repo/typescript-config/node.json"]
+}
+</file>
+
+<file path="packages/trpc/client/index.ts">
+import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
+
+import { type ServerRouter } from "../server";
+
+export type RouterOutputs = inferRouterOutputs<ServerRouter>;
+export type RouterInputs = inferRouterInputs<ServerRouter>;
+
+export type { ServerRouter } from "../server";
+
+export * from "@trpc/client";
+</file>
+
+<file path="packages/trpc/server/routes/health/route.ts">
+import { z, zodUndefinedModel } from "../../schema";
+import { publicProcedure, router } from "../../trpc";
+
+export const healthRouter = router({
+  getHealth: publicProcedure
+    .meta({ openapi: { method: "GET", path: "/health" } })
+    .input(zodUndefinedModel)
+    .output(
+      z.object({
+        status: z.literal("healthy").describe("status of the server"),
+      }),
+    )
+    .query(async () => {
+      return {
+        status: "healthy",
+      };
+    }),
+});
+</file>
+
+<file path="packages/trpc/server/utils/path-generator.ts">
+export function generatePath(base: string) {
+  return function (path: string): `/${string}` {
+    const cleanBase = base.replace(/^\/+|\/+$/g, "");
+    const cleanPath = path.replace(/^\/+|\/+$/g, "");
+    return `/${[cleanBase, cleanPath].filter(Boolean).join("/")}`;
+  };
+}
+</file>
+
+<file path="packages/trpc/server/schema.ts">
+import { z } from "zod";
+
+export const zodUndefinedModel = z.undefined().describe("undefined");
+export { z };
+</file>
+
+<file path="packages/trpc/.eslintrc.cjs">
+/** @type {import("eslint").Linter.Config} */
+const config = {
+  extends: ["@repo/eslint-config/node.js"],
+};
+
+module.exports = config;
+</file>
+
+<file path="packages/trpc/tsconfig.json">
+{
+  "extends": ["@repo/typescript-config/node.json"],
+  "include": ["server/", "client/"]
+}
+</file>
+
+<file path="packages/typescript-config/base.json">
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "incremental": false,
+    "isolatedModules": true,
+    "lib": ["es2022", "DOM", "DOM.Iterable", "ES2015"],
+    "module": "NodeNext",
+    "moduleDetection": "force",
+    "moduleResolution": "NodeNext",
+    "noUncheckedIndexedAccess": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  }
+}
+</file>
+
+<file path="packages/typescript-config/nextjs.json">
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Next.js",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "declaration": false,
+    "declarationMap": false,
+    "incremental": true,
+    "lib": ["dom", "dom.iterable", "es2022"],
+    "jsx": "preserve",
+    "module": "esnext",
+    "target": "ES2022",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "allowJs": true,
+    "checkJs": true,
+    "moduleDetection": "force"
+  },
+  "include": ["src", "next-env.d.ts"],
+  "exclude": ["node_modules"]
+}
+</file>
+
+<file path="packages/typescript-config/node.json">
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Node JS",
+  "extends": "./base.json",
+  "compilerOptions": {
+    "moduleResolution": "Node",
+    "module": "CommonJS"
+  }
+}
+</file>
+
+<file path="packages/typescript-config/package.json">
+{
+  "name": "@repo/typescript-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
+</file>
+
+<file path=".npmrc">
+
+</file>
+
+<file path="docker-compose.yml">
+services:
+  postgresdb:
+    image: postgres:15
+    restart: unless-stopped
+    container_name: postgresdb
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: dev
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+
+volumes:
+  pg_data:
+</file>
+
+<file path="package.json">
+{
+  "name": "trpc-monorepo",
+  "private": true,
+  "scripts": {
+    "build": "dotenv -- turbo build",
+    "dev": "dotenv -- turbo dev",
+    "db:generate": "dotenv -- turbo db:generate",
+    "db:migrate": "dotenv -- turbo db:migrate",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "check-types": "turbo run check-types"
+  },
+  "devDependencies": {
+    "prettier": "^3.7.4",
+    "turbo": "^2.7.2",
+    "typescript": "5.9.2"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "dotenv-cli": "^11.0.0"
+  }
+}
+</file>
+
+<file path="pnpm-workspace.yaml">
+packages:
+  - "apps/*"
+  - "packages/*"
+</file>
+
+<file path="prettier.config.js">
+module.exports = {
+  arrowParens: "always",
+  printWidth: 100,
+  singleQuote: false,
+  jsxSingleQuote: false,
+  semi: true,
+  trailingComma: "all",
+  tabWidth: 2,
+};
+</file>
+
+<file path="README.md">
+# Turborepo starter
+
+This Turborepo starter is maintained by the Turborepo core team.
+
+## Using this example
+
+Run the following command:
+
+```sh
+npx create-turbo@latest
+```
+
+## What's inside?
+
+This Turborepo includes the following packages/apps:
+
+### Apps and Packages
+
+- `docs`: a [Next.js](https://nextjs.org/) app
+- `web`: another [Next.js](https://nextjs.org/) app
+- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
+- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
+- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+
+Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+
+### Utilities
+
+This Turborepo has some additional tools already setup for you:
+
+- [TypeScript](https://www.typescriptlang.org/) for static type checking
+- [ESLint](https://eslint.org/) for code linting
+- [Prettier](https://prettier.io) for code formatting
+
+### Build
+
+To build all apps and packages, run the following command:
+
+```
+cd my-turborepo
+
+# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
+turbo build
+
+# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
+npx turbo build
+yarn dlx turbo build
+pnpm exec turbo build
+```
+
+You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+
+```
+# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
+turbo build --filter=docs
+
+# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
+npx turbo build --filter=docs
+yarn exec turbo build --filter=docs
+pnpm exec turbo build --filter=docs
+```
+
+### Develop
+
+To develop all apps and packages, run the following command:
+
+```
+cd my-turborepo
+
+# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
+turbo dev
+
+# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
+npx turbo dev
+yarn exec turbo dev
+pnpm exec turbo dev
+```
+
+You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+
+```
+# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
+turbo dev --filter=web
+
+# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
+npx turbo dev --filter=web
+yarn exec turbo dev --filter=web
+pnpm exec turbo dev --filter=web
+```
+
+### Remote Caching
+
+> [!TIP]
+> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+
+Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+
+By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+
+```
+cd my-turborepo
+
+# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
+turbo login
+
+# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
+npx turbo login
+yarn exec turbo login
+pnpm exec turbo login
+```
+
+This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
+
+Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
+
+```
+# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
+turbo link
+
+# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
+npx turbo link
+yarn exec turbo link
+pnpm exec turbo link
+```
+
+## Useful Links
+
+Learn more about the power of Turborepo:
+
+- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
+- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
+- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
+- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
+- [Configuration Options](https://turborepo.com/docs/reference/configuration)
+- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+</file>
+
+<file path="setup.sh">
+#!/bin/bash
+
+if [ -f ".env" ]; then
+  echo ".env file exists. ✅"
+else
+  echo ".env file does not exist."
+  cp .env.example .env
+fi
+
+for dir in apps/* packages/*; do
+  if [ -d "$dir" ]; then
+    target="$dir/.env"
+    # Only link if target does not exist or is not already a symlink to the right location
+    if [ ! -L "$target" ] || [ "$(readlink -- "$target")" != "$(realpath .env)" ]; then
+      if [ ! -e "$target" ]; then
+        link .env "$target"
+      fi
+    fi
+  fi
+done
+</file>
+
+<file path="turbo.json">
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "db:generate": {},
+    "db:migrate": {}
+  }
+}
+</file>
+
+<file path="apps/api/src/server.ts">
+import express from "express";
+import { logger } from "@repo/logger";
+import cors from "cors";
+
+import * as trpcExpress from "@trpc/server/adapters/express";
+import { generateOpenApiDocument, createOpenApiExpressMiddleware } from "trpc-to-openapi";
+import { apiReference } from "@scalar/express-api-reference";
+
+import { serverRouter, createContext } from "@repo/trpc/server";
+
+import { env } from "./env";
+
+import cookieParser from "cookie-parser";
+
+export const app = express();
+const openApiDocument = generateOpenApiDocument(serverRouter, {
+  title: "Streamyst OpenAPI",
+  version: "1.0.0",
+  baseUrl: env.BASE_URL.concat("/api"),
+});
+
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
+
+app.use(cookieParser());
+
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  return res.json({ message: "Streamyst is up and running..." });
+});
+
+app.get("/health", (req, res) => {
+  return res.json({ message: "Streamyst server is healthy", healthy: true });
+});
+
+logger.debug(`openapi.json: ${env.BASE_URL}/openapi.json`);
+app.get("/openapi.json", (req, res) => {
+  return res.json(openApiDocument);
+});
+
+logger.debug(`docs: ${env.BASE_URL}/docs`);
+app.use("/docs", apiReference({ url: "/openapi.json" }));
+
+app.use(
+  "/api",
+  createOpenApiExpressMiddleware({
+    router: serverRouter,
+    createContext,
+  }),
+);
+
+app.use(
+  "/trpc",
+  trpcExpress.createExpressMiddleware({
+    router: serverRouter,
+    createContext,
+  }),
+);
+
+export default app;
+</file>
+
+<file path="apps/api/package.json">
+{
+  "name": "@repo/api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node dist/index.js",
+    "dev": "dotenv -- tsx watch ./src/index.ts",
+    "build": "tsup",
+    "lint": "eslint src/*"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@swc/core": "^1.15.8",
+    "@types/cookie-parser": "^1.4.10",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.15.3",
+    "dotenv-cli": "^11.0.0",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@repo/logger": "workspace:*",
+    "@repo/trpc": "workspace:*",
+    "@scalar/express-api-reference": "^0.8.30",
+    "@trpc/server": "^11.8.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "trpc-to-openapi": "^3.1.0",
+    "zod": "^4.3.5"
+  }
+}
+</file>
+
+<file path="apps/web/app/dashboard/forms/[id]/page.tsx">
+import { FormBuilder } from "./_components/form-builder";
+
+export default async function FormBuilderPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+
+  return (
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4 lg:px-6">
+      <div className="rounded-2xl border border-border bg-card p-6">
+        <h1 className="text-3xl font-semibold">Form Builder</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Form ID:{" "}
+          <span className="font-mono text-foreground">{id}</span>
+        </p>
+      </div>
+      <FormBuilder formId={id} />
+    </div>
+  );
+}
+</file>
+
+<file path="apps/web/app/form/[form_id]/page.tsx">
+"use client";
+
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { toast } from "sonner";
+import { useGetFormById, useCreateFormSubmission } from "~/hooks/api/form";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Label } from "~/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/components/ui/card";
+import { Loader2 } from "lucide-react";
+
+type FieldType = "TEXT" | "NUMBER" | "EMAIL" | "YES_NO" | "PASSWORD";
+
+export default function PublicFormPage() {
+  const { form_id } = useParams<{ form_id: string }>();
+  const { form, isLoading, isError } = useGetFormById(form_id);
+  const { createFormSubmissionAsync, isSuccess: isSubmitted, isPending: isSubmitting } = useCreateFormSubmission();
+  const [values, setValues] = useState<Record<string, string>>({});
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (isError || !form) {
+    return (
+      <div className="flex min-h-svh items-center justify-center">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Form not found</CardTitle>
+            <CardDescription>
+              This form may have been removed or the link is invalid.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const missing = form.fields
+      .filter((f) => f.isRequired && !values[f.id]?.trim())
+      .map((f) => f.label);
+
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(", ")}`);
+      return;
+    }
+
+    try {
+      await createFormSubmissionAsync({
+        formId: form_id,
+        values: form.fields
+          .filter((f) => values[f.id]?.trim())
+          .map((f) => ({ formFieldId: f.id, value: values[f.id]! })),
+      });
+      toast.success("Form submitted");
+    } catch {
+      toast.error("Failed to submit form");
+    }
+  };
+
+  const setValue = (fieldId: string, value: string) => {
+    setValues((prev) => ({ ...prev, [fieldId]: value }));
+  };
+
+  if (isSubmitted) {
+    return (
+      <div className="flex min-h-svh items-center justify-center p-6">
+        <Card className="w-full max-w-lg">
+          <CardHeader>
+            <CardTitle>Thank you!</CardTitle>
+            <CardDescription>Your response has been recorded.</CardDescription>
+          </CardHeader>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex min-h-svh items-start justify-center p-6 md:p-10">
+      <Card className="w-full max-w-lg">
+        <CardHeader>
+          <CardTitle>{form.title}</CardTitle>
+          {form.description && (
+            <CardDescription>{form.description}</CardDescription>
+          )}
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+            {form.fields.map((field) => (
+              <div key={field.id} className="flex flex-col gap-1.5">
+                <Label htmlFor={field.id}>
+                  {field.label}
+                  {field.isRequired && (
+                    <span className="text-destructive ml-0.5">*</span>
+                  )}
+                </Label>
+                {field.description && (
+                  <p className="text-xs text-muted-foreground">
+                    {field.description}
+                  </p>
+                )}
+                {field.type === "YES_NO" ? (
+                  <Select
+                    value={values[field.id] ?? ""}
+                    onValueChange={(v) => setValue(field.id, v)}
+                  >
+                    <SelectTrigger id={field.id}>
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Yes">Yes</SelectItem>
+                      <SelectItem value="No">No</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    id={field.id}
+                    type={field.type === "PASSWORD" ? "password" : field.type.toLowerCase()}
+                    placeholder={field.placeholeder ?? ""}
+                    value={values[field.id] ?? ""}
+                    onChange={(e) => setValue(field.id, e.target.value)}
+                  />
+                )}
+              </div>
+            ))}
+            <Button type="submit" className="self-start mt-2" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <><Loader2 className="size-4 animate-spin" /> Submitting...</>
+              ) : (
+                "Submit"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+</file>
+
+<file path="apps/web/trpc/create-client.ts">
+import { httpLink, httpBatchStreamLink } from "@repo/trpc/client";
+import { env } from "~/env.js";
+
+interface CreateTRPCHttpBatchClientClientOpts {
+  enableStreaming?: boolean;
+}
+
+export const createTRPCHttpBatchClientClient = (opts?: CreateTRPCHttpBatchClientClientOpts) => {
+  const c = opts?.enableStreaming ? httpBatchStreamLink : httpLink;
+  return c({
+    url: env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/trpc",
+    fetch(url, options) {
+      return fetch(url, {
+        ...options,
+        credentials: "include",
+      });
+    },
+  });
+};
+</file>
+
+<file path="packages/database/models/form_submission.ts">
+import { pgTable, uuid, varchar, timestamp, boolean, text, numeric, pgEnum, unique, json, jsonb } from "drizzle-orm/pg-core";
+import { formsTable } from "./form";
+
+
+export interface FormSubmissionValue{
+    formFieldId: string;
+    value: string;
+}
+
+export type FormSubmissionValueRow = FormSubmissionValue[]
+
+export const formSubmissionsTable = pgTable("form_submissions", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  formId: uuid("form_id").references(() => formsTable.id).notNull(),
+
+  values: jsonb("values").$type<FormSubmissionValueRow>(),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+}
+);
+</file>
+
+<file path="packages/database/models/user.ts">
+import {
+  pgTable,
+  uuid,
+  varchar,
+  timestamp,
+  boolean,
+  text,
+} from "drizzle-orm/pg-core";
+
+export const usersTable = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+
+  fullName: varchar("full_name", { length: 80 }).notNull(),
+
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  emailVerified: boolean("email_verified").default(false),
+
+  profileImageUrl: text("profile_image_url"),
+
+  salt: text("salt"),
+  password: text("password"),
+
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
+});
+
+export type SelectUser = typeof usersTable.$inferSelect;
+export type InsertUser = typeof usersTable.$inferInsert;
+</file>
+
+<file path="packages/services/form-field/index.ts">
+import { db, eq, asc } from "@repo/database";
+import { formFieldsTable } from "@repo/database/models/form_field";
+import {
+  CreateFormFieldInputType,
+  createFormFieldInput,
+  UpdateFormFieldInputType,
+  updateFormFieldInput,
+  DeleteFormFieldInputType,
+  deleteFormFieldInput,
+  GetFormFieldsInputType,
+  getFormFieldsInput,
+} from "./model";
+
+class FormFieldService {
+  public async createField(payload: CreateFormFieldInputType) {
+    const data = await createFormFieldInput.parseAsync(payload);
+
+    const insertResult = await db
+      .insert(formFieldsTable)
+      .values({
+        formId: data.formId,
+        label: data.label,
+        labelKey: data.labelKey,
+        description: data.description,
+        placeholeder: data.placeholeder,
+        isRequired: data.isRequired,
+        index: data.index,
+        type: data.type,
+      })
+      .returning({ id: formFieldsTable.id });
+
+    const result = insertResult[0];
+    if (!result || !result.id) {
+      throw new Error(`Something went wrong while creating form field`);
+    }
+
+    return result;
+  }
+
+  public async updateField(payload: UpdateFormFieldInputType) {
+    const { fieldId, ...updateData } = await updateFormFieldInput.parseAsync(payload);
+
+    if (Object.keys(updateData).length === 0) {
+      throw new Error("No data provided to update");
+    }
+
+    const updateResult = await db
+      .update(formFieldsTable)
+      .set(updateData)
+      .where(eq(formFieldsTable.id, fieldId))
+      .returning({ id: formFieldsTable.id });
+
+    const result = updateResult[0];
+    if (!result) {
+      throw new Error(`Form field with id ${fieldId} not found or update failed`);
+    }
+
+    return result;
+  }
+
+  public async deleteField(payload: DeleteFormFieldInputType) {
+    const { fieldId } = await deleteFormFieldInput.parseAsync(payload);
+
+    const deleteResult = await db
+      .delete(formFieldsTable)
+      .where(eq(formFieldsTable.id, fieldId))
+      .returning({ id: formFieldsTable.id });
+
+    const result = deleteResult[0];
+    if (!result) {
+      throw new Error(`Form field with id ${fieldId} not found or delete failed`);
+    }
+
+    return result;
+  }
+
+  public async getFields(payload: GetFormFieldsInputType) {
+    const { formId } = await getFormFieldsInput.parseAsync(payload);
+
+    const fields = await db
+      .select()
+      .from(formFieldsTable)
+      .where(eq(formFieldsTable.formId, formId))
+      .orderBy(asc(formFieldsTable.index));
+
+    return fields;
+  }
+}
+
+export default FormFieldService;
+</file>
+
+<file path="packages/services/form-field/model.ts">
+import { z } from "zod";
+
+export const fieldTypeEnumSchema = z.enum(["TEXT", "NUMBER", "EMAIL", "YES_NO", "PASSWORD"]);
+
+export const createFormFieldInput = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+  label: z.string().max(100).describe("Label for the field"),
+  labelKey: z.string().max(100).describe("Unique slug for the label"),
+  description: z.string().optional().describe("Description for the field"),
+  placeholeder: z.string().optional().describe("Placeholder text for the field"),
+  isRequired: z.boolean().default(false).describe("Whether the field is required"),
+  index: z.string().describe("Fractional index for sorting"),
+  type: fieldTypeEnumSchema.describe("Type of the field"),
+});
+
+export type CreateFormFieldInputType = z.infer<typeof createFormFieldInput>;
+
+export const updateFormFieldInput = z.object({
+  fieldId: z.string().uuid().describe("UUID of the field to update"),
+  label: z.string().max(100).optional(),
+  description: z.string().optional(),
+  placeholeder: z.string().optional(),
+  isRequired: z.boolean().optional().default(false),
+  index: z.string().optional(),
+});
+
+export type UpdateFormFieldInputType = z.infer<typeof updateFormFieldInput>;
+
+export const deleteFormFieldInput = z.object({
+  fieldId: z.string().uuid().describe("UUID of the field to delete"),
+});
+
+export type DeleteFormFieldInputType = z.infer<typeof deleteFormFieldInput>;
+
+export const getFormFieldsInput = z.object({
+  formId: z.string().uuid().describe("UUID of the form to get fields for"),
+});
+
+export type GetFormFieldsInputType = z.infer<typeof getFormFieldsInput>;
+</file>
+
+<file path="packages/services/env.ts">
+import { z } from "zod";
+
+const envSchema = z.object({
+  JWT_SECRET: z.string().describe("secret key for JWT tokens")
+});
+
+function createEnv(env: NodeJS.ProcessEnv) {
+  const safeParseResult = envSchema.safeParse(env);
+  if (!safeParseResult.success) throw new Error(safeParseResult.error.message);
+  return safeParseResult.data;
+}
+
+export const env = createEnv(process.env);
+</file>
+
+<file path="packages/services/package.json">
+{
+  "name": "@repo/services",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.15.3",
+    "dotenv-cli": "^11.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@repo/database": "workspace:*",
+    "@repo/logger": "workspace:*",
+    "google-auth-library": "^10.5.0",
+    "jsonwebtoken": "^9.0.3",
+    "zod": "^4.3.5"
+  }
+}
+</file>
+
+<file path="packages/trpc/server/utils/cookie.ts">
+import {CookieOptions, Response, Request} from "express"
+import { TRPCContext } from "../context"
+
+const ONE_MINUTE = 60*1000
+const ONE_HOUR = 60 * ONE_MINUTE
+const ONE_DAY = 24 * ONE_HOUR
+const ONE_MONTH = 30*ONE_DAY
+const ONE_YEAR = 12* ONE_MONTH
+
+const deafultCookieOptions : CookieOptions = {
+    path:"/",
+    httpOnly: true,
+    secure: false,
+    sameSite: "strict",
+    maxAge: ONE_YEAR
+}
+
+export function createCookieFactory(res:Response){
+    return function createCookie(name:string, value:string, opts:CookieOptions = deafultCookieOptions) {
+        res.cookie(name ,value, opts)
+    }
+}
+
+export function getCookieFactory(req: Request){
+    return function getCookie(name: string){
+        return req.cookies?.[name]
+    }
+}
+
+export function clearCookieFactory (res:Response){
+    return function clearCookie(name:string){
+        res.clearCookie(name)
+    }
+}
+
+const AUTHENTICATION_COOKIE_NAME="accessToken"
+
+export function setAuthenticationCookie(ctx:TRPCContext, accessToken:string){
+    ctx.createCookie(AUTHENTICATION_COOKIE_NAME, accessToken)
+}
+
+export function getAuthenticationCookie(ctx:TRPCContext){
+    return ctx.getCookie(AUTHENTICATION_COOKIE_NAME)
+}
+export function clearAuthenticationCookie(ctx:TRPCContext, ){
+    ctx.clearCookie(AUTHENTICATION_COOKIE_NAME)
+}
+</file>
+
+<file path="packages/trpc/server/index.ts">
+import { router } from "./trpc";
+
+import { healthRouter } from "./routes/health/route";
+import { authRouter } from "./routes/auth/route";
+import { formRouter } from "./routes/form/route";
+
+export const serverRouter = router({
+  health: healthRouter,
+  auth: authRouter,
+  form: formRouter,
+});
+
+export { createContext } from "./context";
+export type ServerRouter = typeof serverRouter;
+</file>
+
+<file path="packages/trpc/server/trpc.ts">
+import { initTRPC, TRPCError } from "@trpc/server";
+import { OpenApiMeta } from "trpc-to-openapi";
+
+import { createContext } from "./context";
+import { getAuthenticationCookie } from "./utils/cookie";
+import { userService } from "./services";
+
+export const tRPCContext = initTRPC.meta<OpenApiMeta>().context<typeof createContext>().create({});
+
+export const router = tRPCContext.router;
+
+export const publicProcedure = tRPCContext.procedure;
+
+export const authenticatedProcedure = tRPCContext.procedure.use(async (options) => {
+  const { ctx } = options;
+
+  const userToken = getAuthenticationCookie(ctx);
+
+  const { id } = await userService.verifyAndDecodeUserToken(userToken);
+  if (!userToken) throw new Error(`User is not logged in`);
+  return options.next({
+    ctx: {
+      ...ctx,
+      user: { id },
+    },
+  });
+});
+</file>
+
+<file path="packages/trpc/package.json">
+{
+  "name": "@repo/trpc",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/express": "^5.0.6",
+    "dotenv-cli": "^11.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@repo/services": "workspace:*",
+    "@trpc/client": "^11.8.1",
+    "@trpc/server": "^11.8.1",
+    "express": "^5.2.1",
+    "trpc-to-openapi": "^3.1.0",
+    "zod": "^4.3.5"
+  }
+}
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+
+drizzle/
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Local env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage
+
+# Turbo
+.turbo
+
+# Vercel
+.vercel
+
+# Build Outputs
+.next/
+out/
+build
+dist
+
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Misc
+.DS_Store
+*.pem
+</file>
+
+<file path="apps/web/app/dashboard/forms/page.tsx">
+import { CreateFormDialog } from "./_components/create-form-dialog"
+import { FormList } from "./_components/form-list"
+
+
+export default function DashboardFormsPage() {
+  return (
+    <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+      <div className="px-4 lg:px-6">
+        <div className="space-y-2 rounded-2xl border border-border bg-card p-6">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-semibold">Forms</h1>
+            <p className="text-sm text-muted-foreground">
+              This section shares the dashboard layout, sidebar, and header.
+            </p>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="flex flex-col justify-between rounded-2xl border border-border bg-background p-4">
+              <div>
+                <h2 className="text-lg font-semibold">Create a new form</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Start a blank form or use a template to collect responses.
+                </p>
+              </div>
+              <CreateFormDialog />
+            </div>
+            <div className="rounded-2xl border border-border bg-background p-4">
+              <h2 className="text-lg font-semibold">Published forms</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                View and manage forms that are currently live.
+              </p>
+            </div>
+            <div className="rounded-2xl border border-border bg-background p-4">
+              <h2 className="text-lg font-semibold">Responses</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Review how many responses your forms have received.
+              </p>
+            </div>
+          </div>
+        </div>
+        <FormList />
+      </div>
+    </div>
+  )
+}
+</file>
+
+<file path="apps/web/app/page.tsx">
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useGetUserInfo } from "~/hooks/api/auth";
+
+export default function Home() {
+  const { user } = useGetUserInfo();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (user && user.id) {
+      router.replace("/dashboard");
+    } else {
+      router.replace("/login");
+    }
+  }, [user]);
+
+  return (
+    <main className="min-h-screen min-w-screen flex justify-center items-center">
+      <div>
+        <h2>{JSON.stringify(user, null, 2)}</h2>
+      </div>
+    </main>
+  );
+}
+</file>
+
+<file path="apps/web/hooks/api/auth/index.ts">
+import { trpc } from "~/trpc/client";
+
+export const useSignUp = () => {
+  const utils = trpc.useUtils();
+  const {
+    mutateAsync: createUserWithEmailAndPasswordAsync,
+    mutate: createUserWithEmailAndPassword,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  } = trpc.auth.createUserWithEmailAndPassword.useMutation({
+    onSuccess: async () => {
+      utils.auth.getLoggedInUserInfo.invalidate();
+    },
+  });
+  return {
+    createUserWithEmailAndPasswordAsync,
+    createUserWithEmailAndPassword,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  };
+};
+
+export const useSignIn = () => {
+  const utils = trpc.useUtils();
+
+  const {
+    mutateAsync: signInUserWithEmailAndPasswordAsync,
+    mutate: signInUserWithEmailAndPassword,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  } = trpc.auth.signInUserWithEmailAndPassword.useMutation({
+    onSuccess: async()=>{
+      utils.auth.getLoggedInUserInfo.invalidate()
+    }
+  });
+
+  return {
+    signInUserWithEmailAndPasswordAsync,
+    signInUserWithEmailAndPassword,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  };
+};
+
+export const useGetUserInfo = () => {
+  const {
+    data: user,
+    isError,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.auth.getLoggedInUserInfo.useQuery();
+
+  return { user, isError, isFetched, isFetching, isLoading, status };
+};
+</file>
+
+<file path="apps/web/package.json">
+{
+  "name": "web",
+  "version": "0.1.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint --max-warnings 0",
+    "check-types": "next typegen && tsc --noEmit"
+  },
+  "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/modifiers": "^9.0.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@dnd-kit/utilities": "^3.2.2",
+    "@hookform/resolvers": "^5.2.2",
+    "@radix-ui/react-accordion": "^1.2.12",
+    "@radix-ui/react-alert-dialog": "^1.1.15",
+    "@radix-ui/react-aspect-ratio": "^1.1.8",
+    "@radix-ui/react-avatar": "^1.1.11",
+    "@radix-ui/react-checkbox": "^1.3.3",
+    "@radix-ui/react-collapsible": "^1.1.12",
+    "@radix-ui/react-context-menu": "^2.2.16",
+    "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
+    "@radix-ui/react-hover-card": "^1.1.15",
+    "@radix-ui/react-label": "^2.1.8",
+    "@radix-ui/react-menubar": "^1.1.16",
+    "@radix-ui/react-navigation-menu": "^1.2.14",
+    "@radix-ui/react-popover": "^1.1.15",
+    "@radix-ui/react-progress": "^1.1.8",
+    "@radix-ui/react-radio-group": "^1.3.8",
+    "@radix-ui/react-scroll-area": "^1.2.10",
+    "@radix-ui/react-select": "^2.2.6",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slider": "^1.3.6",
+    "@radix-ui/react-slot": "^1.2.4",
+    "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-tabs": "^1.1.13",
+    "@radix-ui/react-toggle": "^1.1.10",
+    "@radix-ui/react-toggle-group": "^1.1.11",
+    "@radix-ui/react-tooltip": "^1.2.8",
+    "@repo/trpc": "workspace:*",
+    "@t3-oss/env-nextjs": "^0.13.10",
+    "@tabler/icons-react": "^3.44.0",
+    "@tailwindcss/postcss": "^4.1.18",
+    "@tanstack/react-query": "^5.90.16",
+    "@tanstack/react-table": "^8.21.3",
+    "@trpc/react-query": "^11.8.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "cmdk": "^1.1.1",
+    "date-fns": "^4.1.0",
+    "embla-carousel-react": "^8.6.0",
+    "input-otp": "^1.4.2",
+    "lucide-react": "^0.562.0",
+    "next": "16.1.0",
+    "next-themes": "^0.4.6",
+    "postcss": "^8.5.6",
+    "radix-ui": "^1.4.3",
+    "react": "^19.2.0",
+    "react-day-picker": "^9.13.0",
+    "react-dom": "^19.2.0",
+    "react-hook-form": "^7.70.0",
+    "react-resizable-panels": "^4.2.1",
+    "recharts": "3.8.0",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss": "^4.1.18",
+    "vaul": "^1.1.2",
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.2.2",
+    "@types/react-dom": "19.2.2",
+    "dotenv-cli": "^11.0.0",
+    "eslint": "^9.39.1",
+    "tw-animate-css": "^1.4.0",
+    "typescript": "5.9.2"
+  }
+}
+</file>
+
+<file path="packages/services/form/index.ts">
+import { db, eq, desc } from "@repo/database";
+import { formsTable } from "@repo/database/models/form";
+import { formFieldsTable } from "@repo/database/models/form_field";
+import { CreateFormInputType, createFormInput, ListFormsByUserIdInputType, listFormsByUserIdInput, GetFormByIdInputType, getFormByIdInput } from "./model";
+
+class FormService {
+  public async createForm(payload: CreateFormInputType) {
+    const { title, description, createdBy } = await createFormInput.parseAsync(payload);
+
+    const formInsertResult = await db
+      .insert(formsTable)
+      .values({
+        title,
+        description,
+        createdBy,
+      })
+      .returning({ id: formsTable.id });
+
+    if (!formInsertResult || formInsertResult.length === 0 || !formInsertResult[0]?.id) {
+      throw new Error(`Something went wrong while creating form`);
+    }
+
+    return formInsertResult[0];
+  }
+
+  public async listFormsByUserId(payload: ListFormsByUserIdInputType) {
+    const { userId } = await listFormsByUserIdInput.parseAsync(payload);
+    
+    const forms = await db
+      .select()
+      .from(formsTable)
+      .where(eq(formsTable.createdBy, userId))
+      .orderBy(desc(formsTable.createdAt));
+
+    return forms;
+  }
+
+  public async getFormById(payload: GetFormByIdInputType) {
+    const { formId } = await getFormByIdInput.parseAsync(payload);
+
+    const [form] = await db
+      .select()
+      .from(formsTable)
+      .where(eq(formsTable.id, formId))
+      .limit(1);
+
+    if (!form) {
+      throw new Error(`Form not found`);
+    }
+
+    const fields = await db
+      .select()
+      .from(formFieldsTable)
+      .where(eq(formFieldsTable.formId, formId))
+      .orderBy(formFieldsTable.index);
+
+    return { ...form, fields };
+  }
+}
+
+export default FormService;
+</file>
+
+<file path="packages/services/form/model.ts">
+import { z } from "zod";
+
+export const createFormInput = z.object({
+  title: z.string().max(55).describe("Title of the form"),
+  description: z.string().max(30).optional().describe("Description of the form"),
+  createdBy: z.string().uuid().describe("UUID of the user who creates the form"),
+});
+
+export type CreateFormInputType = z.infer<typeof createFormInput>;
+
+export const listFormsByUserIdInput = z.object({
+  userId: z.string().uuid().describe("UUID of the user"),
+});
+
+export type ListFormsByUserIdInputType = z.infer<typeof listFormsByUserIdInput>;
+
+export const getFormByIdInput = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+});
+
+export type GetFormByIdInputType = z.infer<typeof getFormByIdInput>;
+</file>
+
+<file path="packages/services/user/model.ts">
+import { z } from "zod";
+
+export const createUserWithEmailAndPasswordInput = z.object({
+  fullName: z.string().describe("Full name of the user"),
+  email: z.email().describe("Email of the user"),
+  password: z.string().describe("Password of the user"),
+});
+
+export type CreateUserWithEmailAndPasswordInputType = z.infer<
+  typeof createUserWithEmailAndPasswordInput
+>;
+
+export const generateUserTokenPayload = z.object({
+  id: z.string().describe("uuid of the user"),
+});
+
+export type GenerateUserTokenPayloadType = z.infer<typeof generateUserTokenPayload>;
+
+export const signInUserWithEmailAndPasswordInput = z.object({
+  email: z.email().describe("Email of the user"),
+  password: z.string().describe("password of the user"),
+});
+
+export type SignInUserWithEmailAndPasswordInputType = z.infer<
+  typeof signInUserWithEmailAndPasswordInput
+>;
+</file>
+
+<file path="packages/trpc/server/routes/auth/model.ts">
+import { email, z } from "zod";
+
+
+export const createUserWithEmailAndPasswordInputModel = z.object({
+  fullName: z.string().describe("Full name of the user"),
+  email: z.email().describe("Email of the user"),
+  password: z.string().describe("Password of the user"),
+});
+
+export const createUserWithEmailAndPasswordOutputModel = z.object({
+  id: z.string().describe("id of the user created"),
+});
+
+export const signInUserWithEmailAndPasswordInputModel = z.object({
+  email: z.email().describe("Email of the user"),
+  password: z.string().describe("Password of the user")
+})
+
+export const signInUserWithEmailAndPasswordOutputModel = z.object({
+  id: z.string().describe("uuid of the user"),
+})
+
+export const getLoggedInUserInfoInputModel = z.undefined()
+
+export const getLoggedInUserInfoOutputModel = z.object({
+id: z.string().describe("uuid of the user"),
+  email: z.email().describe("Email of the user"),
+  fullName: z.string().describe("Full name of the user"),
+profileImageUrl: z.string().describe("User's profile image url").optional().nullable()
+})
+</file>
+
+<file path="packages/trpc/server/context.ts">
+import { CreateExpressContextOptions } from "@trpc/server/adapters/express";
+
+import { createCookieFactory, getCookieFactory, clearCookieFactory } from "./utils/cookie";
+
+export interface TRPCCtxUser {
+  id: string;
+}
+
+export interface TRPCContext {
+  createCookie: ReturnType<typeof createCookieFactory>;
+  getCookie: ReturnType<typeof getCookieFactory>;
+  clearCookie: ReturnType<typeof clearCookieFactory>;
+
+  user?: TRPCCtxUser;
+}
+
+export async function createContext({
+  req,
+  res,
+}: CreateExpressContextOptions): Promise<TRPCContext> {
+  const ctx: TRPCContext = {
+    createCookie: createCookieFactory(res),
+    getCookie: getCookieFactory(req),
+    clearCookie: clearCookieFactory(res),
+    user: undefined,
+  };
+  return ctx;
+}
+export type Context = Awaited<ReturnType<typeof createContext>>;
+</file>
+
+<file path="packages/database/schema.ts">
+export * from "./models/user";
+export * from "./models/form"
+export * from "./models/form_field"
+export * from "./models/form_submission"
+</file>
+
+<file path="packages/trpc/server/services/index.ts">
+import UserService from "@repo/services/user";
+import FormService from "@repo/services/form";
+import FormFieldService from "@repo/services/form-field";
+import FormSubmissionService from "@repo/services/form-submission";
+
+export const userService = new UserService();
+export const formService = new FormService();
+export const formFieldService = new FormFieldService();
+export const formSubmissionService = new FormSubmissionService();
+</file>
+
+<file path="apps/web/hooks/api/form/index.ts">
+import { trpc } from "~/trpc/client";
+
+export const useCreateForm = () => {
+  const utils = trpc.useUtils();
+
+  const {
+    mutateAsync: createFormAsync,
+    mutate: createForm,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  } = trpc.form.createForm.useMutation({
+    onSuccess: async () => {
+      await utils.form.invalidate();
+    },
+  });
+
+  return {
+    createFormAsync,
+    createForm,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  };
+};
+
+export const useListForms = () => {
+  const {
+    data: forms,
+    isError,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.listForms.useQuery(undefined);
+
+  return { forms, isError, isFetched, isFetching, isLoading, status };
+};
+
+export const useGetFormFields = (formId: string) => {
+  const {
+    data: fields,
+    isError,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.getFormFields.useQuery({ formId });
+
+  return { fields, isError, isFetched, isFetching, isLoading, status };
+};
+
+export const useCreateFormField = () => {
+  const utils = trpc.useUtils();
+
+  const {
+    mutateAsync: createFormFieldAsync,
+    mutate: createFormField,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  } = trpc.form.createFormField.useMutation({
+    onSuccess: async (_, variables) => {
+      await utils.form.getFormFields.invalidate({ formId: variables.formId });
+    },
+  });
+
+  return { createFormFieldAsync, createFormField, error, failureCount, isError, isIdle, isSuccess, status };
+};
+
+export const useUpdateFormField = (formId: string) => {
+  const utils = trpc.useUtils();
+
+  const {
+    mutateAsync: updateFormFieldAsync,
+    mutate: updateFormField,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  } = trpc.form.updateFormField.useMutation({
+    onSuccess: async () => {
+      await utils.form.getFormFields.invalidate({ formId });
+    },
+  });
+
+  return { updateFormFieldAsync, updateFormField, error, failureCount, isError, isIdle, isSuccess, status };
+};
+
+export const useGetFormById = (formId: string) => {
+  const {
+    data: form,
+    isError,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.getFormById.useQuery({ formId });
+
+  return { form, isError, isFetched, isFetching, isLoading, status };
+};
+
+export const useCreateFormSubmission = () => {
+  const {
+    mutateAsync: createFormSubmissionAsync,
+    mutate: createFormSubmission,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isPending,
+    isSuccess,
+    status,
+  } = trpc.form.createFormSubmission.useMutation();
+
+  return { createFormSubmissionAsync, createFormSubmission, error, failureCount, isError, isIdle, isPending, isSuccess, status };
+};
+
+export const useGetFormSubmissions = (formId: string) => {
+  const {
+    data: submissions,
+    isError,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.getFormSubmissions.useQuery({ formId });
+
+  return { submissions, isError, isFetched, isFetching, isLoading, status };
+};
+
+export const useDeleteFormField = (formId: string) => {
+  const utils = trpc.useUtils();
+
+  const {
+    mutateAsync: deleteFormFieldAsync,
+    mutate: deleteFormField,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  } = trpc.form.deleteFormField.useMutation({
+    onSuccess: async () => {
+      await utils.form.getFormFields.invalidate({ formId });
+    },
+  });
+
+  return { deleteFormFieldAsync, deleteFormField, error, failureCount, isError, isIdle, isSuccess, status };
+};
+</file>
+
+<file path="packages/services/user/index.ts">
+import { randomBytes, createHmac, BinaryLike } from "node:crypto";
+import {
+  type CreateUserWithEmailAndPasswordInputType,
+  GenerateUserTokenPayloadType,
+  SignInUserWithEmailAndPasswordInputType,
+  createUserWithEmailAndPasswordInput,
+  generateUserTokenPayload,
+  signInUserWithEmailAndPasswordInput,
+} from "./model";
+import { db, eq } from "@repo/database";
+import { usersTable } from "@repo/database/models/user";
+import * as JWT from "jsonwebtoken";
+import { env } from "../env";
+
+class UserService {
+  private async generateUserToken(payload: GenerateUserTokenPayloadType) {
+    const { id } = await generateUserTokenPayload.parseAsync(payload);
+    const token = JWT.sign({ id }, env.JWT_SECRET);
+    return { token };
+  }
+
+  private async verifyUserToken(token:string): Promise<GenerateUserTokenPayloadType>{
+   try {
+    const verificationResult = JWT.verify(token, env.JWT_SECRET) as GenerateUserTokenPayloadType
+    return verificationResult
+   } catch (error) {
+    throw new Error(`Invalid Token`)
+   }
+  }
+
+  public async getUserInfoByID(id:string){
+    const user = await db.select({
+      id: usersTable.id,
+      email: usersTable.email,
+      fullName: usersTable.fullName,
+      profileImageUrl: usersTable.profileImageUrl
+    }).from(usersTable).where(eq(usersTable.id, id))
+
+    if(!user || user.length === 0)throw new Error (`User with id = ${id} does not exist`)
+
+      return user[0]!
+}
+
+  private async getUserByEmail(email: string) {
+    const result = await db.select().from(usersTable).where(eq(usersTable.email, email));
+    if (!result || result.length === 0) return null;
+    return result[0];
+  }
+
+  private async generateHash(salt: string, password: string) {
+    return createHmac("sha256", salt).update(password).digest("hex");
+  }
+
+  public async createUserWithEmailAndPassword(payload: CreateUserWithEmailAndPasswordInputType) {
+    const { fullName, email, password } =
+      await createUserWithEmailAndPasswordInput.parseAsync(payload);
+
+    // Check if user already exists
+    const existing = await this.getUserByEmail(email);
+
+    if (existing) throw new Error(`User with email ${email} already exists`);
+
+    // Create salt and calculate hash
+    const salt = randomBytes(16).toString("hex");
+    const hash = await this.generateHash(salt, password);
+
+    //Create user in DB
+    const userInsertResult = await db
+      .insert(usersTable)
+      .values({ fullName, email, password: hash, salt })
+      .returning({ id: usersTable.id });
+
+    if (!userInsertResult || userInsertResult.length === 0 || !userInsertResult[0]?.id)
+      throw new Error(`Something went wrong while creating user`);
+
+    const userID = userInsertResult[0].id;
+
+    const { token } = await this.generateUserToken({ id: userID });
+
+    return { id: userID, token };
+  }
+
+  public async signInUserWithEmailAndPassword(payload: SignInUserWithEmailAndPasswordInputType) {
+    const { email, password } = await signInUserWithEmailAndPasswordInput.parseAsync(payload);
+    // Check if user exists or not
+    const existingUser = await this.getUserByEmail(email);
+
+    if (!existingUser) throw new Error(`User with email:${email} does not exist`);
+
+    if (!existingUser.salt || !existingUser.password)
+      throw new Error(`Invalid authentication method`);
+
+    // Check password correct or not
+    const hash = await this.generateHash(existingUser.salt, password);
+    const isCorrectPassword = hash === existingUser.password;
+
+    if (!isCorrectPassword) throw new Error("Invalid email or password");
+
+    const { token } = await this.generateUserToken({ id: existingUser.id });
+
+    return {
+      id:existingUser.id,
+      token,
+    };
+  }
+
+  public async verifyAndDecodeUserToken(token:string){
+    const {id} = await this.verifyUserToken(token)
+     return {id}
+  }
+}
+
+export default UserService;
+</file>
+
+<file path="packages/trpc/server/routes/form/model.ts">
+import { z } from "zod";
+
+export const createFormInputModel = z.object({
+  title: z.string().max(55).describe("Title of the form"),
+  description: z.string().max(30).optional().describe("Description of the form"),
+});
+
+export const createFormOutputModel = z.object({
+  id: z.string().uuid().describe("ID of the newly created form"),
+});
+
+export const listFormsInputModel = z.undefined();
+
+export const listFormsOutputModel = z.array(
+  z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    description: z.string().nullable().optional(),
+    createdBy: z.string().uuid().nullable().optional(),
+    createdAt: z.date().nullable().optional(),
+    updatedAt: z.date().nullable().optional(),
+  })
+);
+
+import { fieldTypeEnumSchema } from "@repo/services/form-field/model";
+
+// Form Field Inputs
+export const createFormFieldInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+  label: z.string().max(100).describe("Label for the field"),
+  labelKey: z.string().max(100).describe("Unique slug for the label"),
+  description: z.string().optional().describe("Description for the field"),
+  placeholeder: z.string().optional().describe("Placeholder text for the field"),
+  isRequired: z.boolean().default(false).describe("Whether the field is required"),
+  index: z.string().describe("Fractional index for sorting"),
+  type: fieldTypeEnumSchema.describe("Type of the field"),
+});
+
+export const updateFormFieldInputModel = z.object({
+  fieldId: z.string().uuid().describe("UUID of the field to update"),
+  label: z.string().max(100).optional(),
+  description: z.string().optional(),
+  placeholeder: z.string().optional(),
+  isRequired: z.boolean().optional().default(false),
+  index: z.string().optional(),
+});
+
+export const deleteFormFieldInputModel = z.object({
+  fieldId: z.string().uuid().describe("UUID of the field to delete"),
+});
+
+export const getFormFieldsInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form to get fields for"),
+});
+
+// Form Field Outputs
+export const formFieldActionOutputModel = z.object({
+  id: z.string().uuid().describe("ID of the form field"),
+});
+
+export const getFormByIdInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+});
+
+export const getFormByIdOutputModel = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  description: z.string().nullable().optional(),
+  createdBy: z.string().uuid().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  fields: z.array(
+    z.object({
+      id: z.string().uuid(),
+      formId: z.string().uuid().nullable().optional(),
+      label: z.string(),
+      labelKey: z.string(),
+      description: z.string().nullable().optional(),
+      placeholeder: z.string().nullable().optional(),
+      isRequired: z.boolean(),
+      index: z.string(),
+      type: fieldTypeEnumSchema,
+      createdAt: z.date().nullable().optional(),
+      updatedAt: z.date().nullable().optional(),
+    })
+  ),
+});
+
+const formSubmissionValueModel = z.object({
+  formFieldId: z.string().uuid(),
+  value: z.string(),
+});
+
+export const createFormSubmissionInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+  values: z.array(formSubmissionValueModel).describe("Array of field submissions"),
+});
+
+export const createFormSubmissionOutputModel = z.object({
+  id: z.string().uuid().describe("ID of the submission"),
+});
+
+export const getFormSubmissionsInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+});
+
+export const getFormSubmissionsOutputModel = z.array(
+  z.object({
+    id: z.string().uuid(),
+    formId: z.string().uuid(),
+    values: z.array(formSubmissionValueModel).nullable().optional(),
+    createdAt: z.date().nullable().optional(),
+    updatedAt: z.date().nullable().optional(),
+  })
+);
+
+export const getFormFieldsOutputModel = z.array(
+  z.object({
+    id: z.string().uuid(),
+    formId: z.string().uuid().nullable().optional(),
+    label: z.string(),
+    labelKey: z.string(),
+    description: z.string().nullable().optional(),
+    placeholeder: z.string().nullable().optional(),
+    isRequired: z.boolean(),
+    index: z.string(),
+    type: fieldTypeEnumSchema,
+    createdAt: z.date().nullable().optional(),
+    updatedAt: z.date().nullable().optional(),
+  })
+);
+</file>
+
+<file path="packages/trpc/server/routes/auth/route.ts">
+import { userService } from "../../services";
+import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
+import { getAuthenticationCookie, setAuthenticationCookie } from "../../utils/cookie";
+import { generatePath } from "../../utils/path-generator";
+import {
+  createUserWithEmailAndPasswordInputModel,
+  createUserWithEmailAndPasswordOutputModel,
+  getLoggedInUserInfoInputModel,
+  getLoggedInUserInfoOutputModel,
+  signInUserWithEmailAndPasswordInputModel,
+  signInUserWithEmailAndPasswordOutputModel,
+} from "./model";
+
+const TAGS = ["Authentication"];
+const getPath = generatePath("/authentication");
+
+export const authRouter = router({
+  createUserWithEmailAndPassword: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: getPath("/createUserWithEmailAndPassword"),
+        tags: TAGS,
+      },
+    })
+    .input(createUserWithEmailAndPasswordInputModel)
+    .output(createUserWithEmailAndPasswordOutputModel)
+    .mutation(async ({ input, ctx }) => {
+      const { fullName, email, password } = input;
+
+      const { id, token } = await userService.createUserWithEmailAndPassword({
+        fullName,
+        email,
+        password,
+      });
+
+      setAuthenticationCookie(ctx, token);
+
+      return { id };
+    }),
+
+  signInUserWithEmailAndPassword: publicProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: getPath("/signInUserWithEmailAndPassword"),
+        tags: TAGS,
+      },
+    })
+    .input(signInUserWithEmailAndPasswordInputModel)
+    .output(signInUserWithEmailAndPasswordOutputModel)
+    .mutation(async ({ input, ctx }) => {
+      const { email, password } = input;
+      const { id, token } = await userService.signInUserWithEmailAndPassword({ email, password });
+
+      setAuthenticationCookie(ctx, token);
+
+      return { id };
+    }),
+
+  getLoggedInUserInfo: authenticatedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: "/getLoggedInUserInfo",
+        tags: TAGS,
+        protect:true
+      },
+    })
+    .input(getLoggedInUserInfoInputModel)
+    .output(getLoggedInUserInfoOutputModel)
+    .query(async ({ ctx }) => {
+     
+     const {email,fullName,id,profileImageUrl}=   await userService.getUserInfoByID(ctx.user.id);
+
+      return { id, email, fullName, profileImageUrl };
+    }),
+});
+</file>
+
+<file path="packages/trpc/server/routes/form/route.ts">
+import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
+import { formService, formFieldService, formSubmissionService } from "../../services";
+import { generatePath } from "../../utils/path-generator";
+import {
+  createFormInputModel,
+  createFormOutputModel,
+  listFormsInputModel,
+  listFormsOutputModel,
+  createFormFieldInputModel,
+  updateFormFieldInputModel,
+  deleteFormFieldInputModel,
+  getFormFieldsInputModel,
+  formFieldActionOutputModel,
+  getFormFieldsOutputModel,
+  getFormByIdInputModel,
+  getFormByIdOutputModel,
+  createFormSubmissionInputModel,
+  createFormSubmissionOutputModel,
+  getFormSubmissionsInputModel,
+  getFormSubmissionsOutputModel,
+} from "./model";
+
+const TAGS = ["Form"];
+const getPath = generatePath("/form");
+export const formRouter = router({
+  createForm: authenticatedProcedure
+    .meta({
+      openapi: {
+        method: "POST",
+        path: getPath("/createForm"),
+        tags: TAGS,
+        protect: true,
+      },
+    })
+    .input(createFormInputModel)
+    .output(createFormOutputModel)
+    .mutation(async ({ input, ctx }) => {
+      const { title, description } = input;
+      // authenticatedProcedure ensures ctx.user.id is populated
+      const createdBy = ctx.user.id;
+
+      const { id } = await formService.createForm({
+        title,
+        description,
+        createdBy,
+      });
+
+      return { id };
+    }),
+
+  listForms: authenticatedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: getPath("/listForms"),
+        tags: TAGS,
+        protect: true,
+      },
+    })
+    .input(listFormsInputModel)
+    .output(listFormsOutputModel)
+    .query(async ({ ctx }) => {
+      const forms = await formService.listFormsByUserId({ userId: ctx.user.id });
+      return forms;
+    }),
+
+  createFormField: authenticatedProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/createFormField"), tags: TAGS, protect: true },
+    })
+    .input(createFormFieldInputModel)
+    .output(formFieldActionOutputModel)
+    .mutation(async ({ input }) => {
+      const result = await formFieldService.createField(input);
+      return result;
+    }),
+
+  updateFormField: authenticatedProcedure
+    .meta({
+      openapi: { method: "PATCH", path: getPath("/updateFormField"), tags: TAGS, protect: true },
+    })
+    .input(updateFormFieldInputModel)
+    .output(formFieldActionOutputModel)
+    .mutation(async ({ input }) => {
+      const result = await formFieldService.updateField(input);
+      return result;
+    }),
+
+  deleteFormField: authenticatedProcedure
+    .meta({
+      openapi: { method: "DELETE", path: getPath("/deleteFormField"), tags: TAGS, protect: true },
+    })
+    .input(deleteFormFieldInputModel)
+    .output(formFieldActionOutputModel)
+    .mutation(async ({ input }) => {
+      const result = await formFieldService.deleteField(input);
+      return result;
+    }),
+
+  getFormById: publicProcedure
+    .meta({
+      openapi: { method: "GET", path: getPath("/getFormById"), tags: TAGS },
+    })
+    .input(getFormByIdInputModel)
+    .output(getFormByIdOutputModel)
+    .query(async ({ input }) => {
+      const result = await formService.getFormById(input);
+      return result;
+    }),
+
+  createFormSubmission: publicProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/createFormSubmission"), tags: TAGS },
+    })
+    .input(createFormSubmissionInputModel)
+    .output(createFormSubmissionOutputModel)
+    .mutation(async ({ input }) => {
+      const result = await formSubmissionService.createSubmission(input);
+      return result;
+    }),
+
+  getFormSubmissions: authenticatedProcedure
+    .meta({
+      openapi: { method: "GET", path: getPath("/getFormSubmissions"), tags: TAGS, protect: true },
+    })
+    .input(getFormSubmissionsInputModel)
+    .output(getFormSubmissionsOutputModel)
+    .query(async ({ input }) => {
+      const result = await formSubmissionService.getSubmissions(input);
+      return result;
+    }),
+
+  getFormFields: authenticatedProcedure
+    .meta({
+      openapi: { method: "GET", path: getPath("/getFormFields"), tags: TAGS, protect: true },
+    })
+    .input(getFormFieldsInputModel)
+    .output(getFormFieldsOutputModel)
+    .query(async ({ input }) => {
+      const result = await formFieldService.getFields(input);
+      return result;
+    }),
+});
+</file>
+
+</files>
