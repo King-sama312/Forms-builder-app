@@ -252,20 +252,22 @@ export function Clippy() {
           </div>
         )}
 
-        <button
+        <div
           onClick={handleClippyClick}
-          className="w-18 h-18 bg-[#c0c0c0] border-2 border-[#dfdfdf] border-r-[#808080] border-b-[#808080] flex flex-col items-center justify-center gap-0.5 hover:bg-[#d4d4d0] active:border-[#808080] active:border-r-[#dfdfdf] active:border-b-[#dfdfdf] cursor-pointer"
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClippyClick(); } }}
+          role="button"
+          tabIndex={0}
+          className="cursor-pointer hover:scale-110 transition-transform"
           title="Clippy - AI Form Assistant"
         >
           <img
             src="/clippy.png"
             alt="Clippy"
-            width={40}
-            height={28}
+            width={80}
+            height={50}
             className="object-contain"
           />
-          <span className="text-[10px] leading-none font-bold text-[#000080] select-none">Clippy</span>
-        </button>
+        </div>
       </div>
 
       {isChatOpen && user && (
