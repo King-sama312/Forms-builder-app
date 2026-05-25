@@ -30,6 +30,22 @@ export function DesktopIcons() {
         }
       />
       <Icon
+        label="Music Player"
+        onClick={() => router.push('/music-player')}
+        icon={
+          <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
+            <rect x="2" y="2" width="28" height="28" rx="2" fill="#c0c0c0" stroke="#000" strokeWidth="1"/>
+            <circle cx="12" cy="20" r="4" fill="#fff" stroke="#000" strokeWidth="1"/>
+            <circle cx="22" cy="18" r="3" fill="#fff" stroke="#000" strokeWidth="1"/>
+            <rect x="16" y="8" width="8" height="2" fill="#000080"/>
+            <rect x="16" y="12" width="6" height="2" fill="#000080"/>
+            <rect x="16" y="16" width="4" height="2" fill="#000080"/>
+            <path d="M12 20 L12 10 L16 8 L16 14 Z" fill="#808080" stroke="#000" strokeWidth="0.5"/>
+            <path d="M22 18 L22 10 L16 8" stroke="#000" strokeWidth="0.5" fill="none"/>
+          </svg>
+        }
+      />
+      <Icon
         label="Login"
         onClick={() => router.push('/login')}
         icon={
