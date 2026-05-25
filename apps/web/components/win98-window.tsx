@@ -93,8 +93,7 @@ export function Win98Window({
     >
       <div className="window flex flex-col w-full h-full bg-[#c0c0c0]">
         <div className="title-bar">
-          <div className="title-bar-text flex items-center gap-1">
-            <span className="w-4 h-4 inline-block border border-black bg-blue-800" />
+          <div className="title-bar-text">
             {title}
           </div>
           <div className="title-bar-controls">
