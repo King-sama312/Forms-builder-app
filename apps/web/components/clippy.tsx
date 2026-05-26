@@ -298,7 +298,7 @@ export function Clippy() {
     <>
       <div className="fixed bottom-14 right-4 z-99999 flex flex-col items-end gap-1">
         {(showBubble || showLoginBubble) && (
-          <div className="relative bg-[#ffffcc] border-2 border-[#000080] rounded px-4 py-3 text-base max-w-64 shadow-[2px_2px_0px_#000]">
+          <div className="relative bg-[#ffffcc] border-2 border-[#000080] rounded px-4 py-3 text-base max-w-64 shadow-[2px_2px_0px_#000]" style={{ fontFamily: "'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Geneva, sans-serif" }}>
             <div className="absolute -bottom-1.75 right-8 w-3 h-3 bg-[#ffffcc] border-r-2 border-b-2 border-[#000080] rotate-45" />
             <p className="leading-tight">
               {showLoginBubble ? 'Log in to use me to make forms!' : bubbleMessage}
@@ -340,7 +340,7 @@ export function Clippy() {
           fixed
           windowId="clippy-chat"
         >
-          <div className="flex flex-col h-full gap-2">
+          <div className="flex flex-col h-full gap-2" style={{ fontFamily: "'MS Sans Serif', 'Microsoft Sans Serif', Tahoma, Geneva, sans-serif" }}>
             <div className="flex-1 overflow-auto border border-[#808080] bg-white p-2 space-y-2 min-h-0">
               {messages.map((msg, i) => (
                 <div
