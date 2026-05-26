@@ -7,7 +7,7 @@ const ONE_DAY = 24 * ONE_HOUR
 const ONE_MONTH = 30*ONE_DAY
 const ONE_YEAR = 12* ONE_MONTH
 
-const isProduction = process.env.NODE_ENV === "prod"
+const isProduction = process.env.NODE_ENV === ("prod" as string)
 
 const deafultCookieOptions : CookieOptions = {
     path:"/",

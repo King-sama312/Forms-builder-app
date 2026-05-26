@@ -44,7 +44,10 @@ class DeleteFormService {
       .where(whereClause)
       .orderBy(desc(deletedFormsTable.createdAt));
 
-    return rows;
+    return rows.map((row) => ({
+      ...row,
+      data: row.data as Record<string, any>,
+    }));
   }
 }
 
