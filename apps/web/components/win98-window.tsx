@@ -24,7 +24,7 @@ export function Win98Window({
 }: Win98WindowProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { minimizeWindow, isMinimized, registerWindow, unregisterWindow } = useWindows();
+  const { minimizeWindow, isMinimized, registerWindow, unregisterWindow, setWindowMaximized } = useWindows();
   const windowIdRef = useRef<string>(Math.random().toString(36).substr(2, 9));
 
   const [windowState, setWindowState] = useState<'normal' | 'maximized'>('normal');
@@ -55,13 +55,15 @@ export function Win98Window({
       setWindowState('normal');
       setPosition({ x: prevRef.current.x, y: prevRef.current.y });
       setSize({ width: prevRef.current.width, height: prevRef.current.height });
+      setWindowMaximized(windowIdRef.current, false);
     } else {
       prevRef.current = { x: position.x, y: position.y, width: size.width, height: size.height };
       setWindowState('maximized');
       setPosition({ x: 0, y: 0 });
       setSize({ width: window.innerWidth, height: window.innerHeight - TASKBAR_HEIGHT });
+      setWindowMaximized(windowIdRef.current, true);
     }
-  }, [windowState, position, size]);
+  }, [windowState, position, size, setWindowMaximized]);
 
   const handleDragStop = useCallback((_e: any, d: { x: number; y: number }) => {
     setPosition({ x: d.x, y: d.y });

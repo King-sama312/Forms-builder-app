@@ -7,6 +7,7 @@ interface WindowInfo {
   title: string;
   pathname: string;
   minimized: boolean;
+  maximized: boolean;
 }
 
 interface WindowsContextType {
@@ -16,6 +17,7 @@ interface WindowsContextType {
   isMinimized: (id: string) => boolean;
   registerWindow: (id: string, title: string, pathname: string) => void;
   unregisterWindow: (id: string) => void;
+  setWindowMaximized: (id: string, maximized: boolean) => void;
 }
 
 const WindowsContext = createContext<WindowsContextType | undefined>(undefined);
@@ -49,9 +51,9 @@ export function WindowsProvider({ children }: { children: ReactNode }) {
     setWindows(prev => {
       const existing = prev.findIndex(w => w.pathname === pathname);
       if (existing !== -1) {
-        return prev.map((w, i) => i === existing ? { ...w, id, title, minimized: false } : w);
+        return prev.map((w, i) => i === existing ? { ...w, id, title, minimized: false, maximized: false } : w);
       }
-      return [...prev, { id, title, pathname, minimized: false }];
+      return [...prev, { id, title, pathname, minimized: false, maximized: false }];
     });
   }, []);
 
@@ -59,7 +61,11 @@ export function WindowsProvider({ children }: { children: ReactNode }) {
     setWindows(prev => prev.filter(w => w.id !== id));
   }, []);
 
-  const contextValue = { windows, minimizeWindow, restoreWindow, isMinimized, registerWindow, unregisterWindow };
+  const setWindowMaximized = useCallback((id: string, maximized: boolean) => {
+    setWindows(prev => prev.map(w => w.id === id ? { ...w, maximized } : w));
+  }, []);
+
+  const contextValue = { windows, minimizeWindow, restoreWindow, isMinimized, registerWindow, unregisterWindow, setWindowMaximized };
 
   return (
     <WindowsContext.Provider value={contextValue}>

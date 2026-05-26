@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Win98Window } from './win98-window';
 import { useGetUserInfo } from '~/hooks/api/auth';
 import { useCreateForm } from '~/hooks/api/form';
+import { useWindows } from '~/components/windows-context';
 import { trpc } from '~/trpc/client';
 
 interface Message {
@@ -69,6 +70,7 @@ export function Clippy() {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [chatPosition, setChatPosition] = useState({ x: 0, y: 0 });
+  const { windows } = useWindows();
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const speechTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -232,18 +234,20 @@ export function Clippy() {
     }
   };
 
+  if (windows.some(w => w.maximized)) return null;
+
   return (
     <>
       <div className="fixed bottom-14 right-4 z-99999 flex flex-col items-end gap-1">
         {(showBubble || showLoginBubble) && (
-          <div className="relative bg-[#ffffcc] border-2 border-[#000080] rounded px-3 py-2 text-sm max-w-50 shadow-[2px_2px_0px_#000]">
+          <div className="relative bg-[#ffffcc] border-2 border-[#000080] rounded px-4 py-3 text-base max-w-64 shadow-[2px_2px_0px_#000]">
             <div className="absolute -bottom-1.75 right-8 w-3 h-3 bg-[#ffffcc] border-r-2 border-b-2 border-[#000080] rotate-45" />
             <p className="leading-tight">
               {showLoginBubble ? 'Log in to use me to make forms!' : bubbleMessage}
             </p>
             {showLoginBubble && (
               <button
-                className="mt-1 text-[#0000ff] underline text-sm block"
+                className="mt-1 text-[#0000ff] underline text-base block"
                 onClick={(e) => { e.stopPropagation(); router.push('/login'); }}
               >
                 Go to Login
