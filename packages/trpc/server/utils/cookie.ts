@@ -13,7 +13,7 @@ const deafultCookieOptions : CookieOptions = {
     path:"/",
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
+    sameSite: isProduction ? "none" : "lax",
     maxAge: Number(process.env.SESSION_DURATION_MS) || ONE_YEAR,
     domain: process.env.COOKIE_DOMAIN || undefined,
 }
