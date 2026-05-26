@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { GlobalProviders } from '~/providers/global';
 import { WindowsProvider } from '~/components/windows-context';
-import { Clippy } from '~/components/clippy';
+import { CookieConsent } from '~/components/cookie-consent';
 
 export const metadata: Metadata = {
   icons: {
@@ -22,7 +22,7 @@ export default function RootLayout({
         <GlobalProviders>
           <WindowsProvider>
             {children}
-            <Clippy />
+            <CookieConsent />
           </WindowsProvider>
         </GlobalProviders>
       </body>
