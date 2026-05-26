@@ -15,9 +15,9 @@ export const authenticatedProcedure = tRPCContext.procedure.use(async (options) 
   const { ctx } = options;
 
   const userToken = getAuthenticationCookie(ctx);
+  if (!userToken) throw new TRPCError({ code: "UNAUTHORIZED", message: "User is not logged in" });
 
   const { id } = await userService.verifyAndDecodeUserToken(userToken);
-  if (!userToken) throw new Error(`User is not logged in`);
   return options.next({
     ctx: {
       ...ctx,
