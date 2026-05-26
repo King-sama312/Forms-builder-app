@@ -119,16 +119,15 @@ export function FormFieldEditor({ formId }: { formId: string }) {
                   </div>
                   <div className="field-row-stacked">
                     <label className="text-xs">Required</label>
-                    <button
-                      type="button"
+                    <span
                       role="switch"
                       aria-checked={field.required}
                       onClick={() =>
                         updateField(field.id, { required: !field.required })
                       }
-                      className={`relative inline-flex h-5 w-9 items-center border ${
+                      className={`relative inline-flex h-5 w-10 items-center border cursor-pointer ${
                         field.required
-                          ? 'bg-[#000080] border-[#000080]'
+                          ? 'bg-blue-400 border-blue-400'
                           : 'bg-[#c0c0c0] border-[#808080]'
                       }`}
                     >
@@ -137,7 +136,7 @@ export function FormFieldEditor({ formId }: { formId: string }) {
                           field.required ? 'translate-x-[18px]' : 'translate-x-[2px]'
                         }`}
                       />
-                    </button>
+                    </span>
                   </div>
                 </div>
 
