@@ -66,7 +66,6 @@ const btnStyle: React.CSSProperties = {
   background: '#c0c0c0',
   border: '2px outset #fff',
   cursor: 'pointer',
-  fontSize: 11,
   fontFamily: 'inherit',
   padding: 0,
 };
@@ -203,7 +202,6 @@ export function MusicPlayer() {
           border: '2px inset #fff',
           background: '#fff',
           marginBottom: 6,
-          fontSize: 11,
           fontFamily: 'inherit',
         }}
       >
@@ -269,7 +267,7 @@ export function MusicPlayer() {
             position: 'absolute',
             right: 4,
             top: 0,
-            fontSize: 10,
+            fontSize: 13,
             lineHeight: '14px',
             color: duration > 0 && currentTime / duration > 0.5 ? '#fff' : '#000',
           }}

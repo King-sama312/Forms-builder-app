@@ -96,7 +96,7 @@ export function BootScreen({ onBootComplete, clickToStart }: BootScreenProps) {
           style={{
             color: 'white',
             fontSize: '1rem',
-            fontFamily: "'Times New Roman', serif",
+            fontFamily: "'Pixelated MS Sans Serif', Arial, sans-serif",
             animation: 'pulse 1.5s ease-in-out infinite',
           }}
         >
@@ -135,7 +135,7 @@ export function BootScreen({ onBootComplete, clickToStart }: BootScreenProps) {
             color: 'white',
             fontSize: '0.75rem',
             marginTop: '0.375rem',
-            fontFamily: "'Times New Roman', serif",
+            fontFamily: "'Pixelated MS Sans Serif', Arial, sans-serif",
           }}
         >
           {started ? 'Starting Windows 98...' : 'Ready'}

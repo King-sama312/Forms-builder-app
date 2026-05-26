@@ -6,8 +6,8 @@ import { useGetUserInfo } from '~/hooks/api/auth/index';
 function Icon({ label, icon, onClick }: { label: string; icon: React.ReactNode; onClick: () => void }) {
   return (
     <div className="desktop-icon" onDoubleClick={onClick}>
-      <div className="w-10 h-10 mb-1">{icon}</div>
-      <span className="text-xs text-center leading-tight">{label}</span>
+      <div className="w-14 h-14 mb-1">{icon}</div>
+      <span className="text-sm text-center leading-tight">{label}</span>
     </div>
   );
 }

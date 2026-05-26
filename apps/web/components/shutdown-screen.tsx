@@ -63,7 +63,7 @@ export function ShutdownScreen() {
               color: 'white',
               fontSize: '1.25rem',
               marginTop: '2rem',
-              fontFamily: "'Times New Roman', serif",
+              fontFamily: "'Pixelated MS Sans Serif', Arial, sans-serif",
             }}
           >
             Windows is shutting down...
@@ -76,7 +76,7 @@ export function ShutdownScreen() {
           style={{
             color: 'white',
             fontSize: '2.5rem',
-            fontFamily: "'Times New Roman', serif",
+            fontFamily: "'Pixelated MS Sans Serif', Arial, sans-serif",
             textAlign: 'center',
             lineHeight: 1.3,
           }}
@@ -92,7 +92,7 @@ export function ShutdownScreen() {
           style={{
             color: 'white',
             fontSize: '1.5rem',
-            fontFamily: "'Times New Roman', serif",
+            fontFamily: "'Pixelated MS Sans Serif', Arial, sans-serif",
             textAlign: 'center',
             lineHeight: 1.3,
           }}

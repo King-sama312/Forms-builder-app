@@ -44,7 +44,7 @@ export function Taskbar({ onShutdown }: { onShutdown?: () => void }) {
             height: 22,
             padding: '0 8px',
             fontFamily: 'inherit',
-            fontSize: 11,
+            fontSize: 14,
             fontWeight: 700,
             background: '#c0c0c0',
             border: '2px outset #fff',
@@ -85,7 +85,7 @@ export function Taskbar({ onShutdown }: { onShutdown?: () => void }) {
           style={{
             height: 22,
             padding: '0 8px',
-            fontSize: 11,
+            fontSize: 14,
             background: '#c0c0c0',
             border: '2px inset #fff',
             display: 'flex',
@@ -123,7 +123,7 @@ function TaskbarItem({
       style={{
         height: 22,
         padding: '0 8px',
-        fontSize: 11,
+        fontSize: 14,
         background: active ? '#d4d0c8' : '#c0c0c0',
         border: active ? '2px inset #fff' : '2px outset #fff',
         display: 'flex',

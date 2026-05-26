@@ -236,14 +236,14 @@ export function Clippy() {
     <>
       <div className="fixed bottom-14 right-4 z-99999 flex flex-col items-end gap-1">
         {(showBubble || showLoginBubble) && (
-          <div className="relative bg-[#ffffcc] border-2 border-[#000080] rounded px-3 py-2 text-xs max-w-50 shadow-[2px_2px_0px_#000]">
+          <div className="relative bg-[#ffffcc] border-2 border-[#000080] rounded px-3 py-2 text-sm max-w-50 shadow-[2px_2px_0px_#000]">
             <div className="absolute -bottom-1.75 right-8 w-3 h-3 bg-[#ffffcc] border-r-2 border-b-2 border-[#000080] rotate-45" />
             <p className="leading-tight">
               {showLoginBubble ? 'Log in to use me to make forms!' : bubbleMessage}
             </p>
             {showLoginBubble && (
               <button
-                className="mt-1 text-[#0000ff] underline text-xs block"
+                className="mt-1 text-[#0000ff] underline text-sm block"
                 onClick={(e) => { e.stopPropagation(); router.push('/login'); }}
               >
                 Go to Login
@@ -295,7 +295,7 @@ export function Clippy() {
                         />
                       )}
                       <div
-                        className={`max-w-[75%] px-2 py-1 text-xs leading-snug border whitespace-pre-wrap ${
+                        className={`max-w-[75%] px-2 py-1 text-base leading-snug border whitespace-pre-wrap ${
                           msg.role === 'user'
                             ? 'bg-[#000080] text-white border-[#000080]'
                             : msg.text === 'Thinking...'
@@ -312,13 +312,13 @@ export function Clippy() {
 
                 {generatedForm && (
                   <div className="border border-[#808080] bg-[#ffffcc] p-2 shrink-0">
-                    <p className="text-xs font-bold mb-1">Preview: {generatedForm.title}</p>
+                    <p className="text-sm font-bold mb-1">Preview: {generatedForm.title}</p>
                     {generatedForm.description && (
-                      <p className="text-xs mb-1 text-gray-600">{generatedForm.description}</p>
+                      <p className="text-sm mb-1 text-gray-600">{generatedForm.description}</p>
                     )}
                     <div className="space-y-0.5 mb-2">
                       {generatedForm.fields.map((f, i) => (
-                        <div key={i} className="text-xs flex gap-1">
+                        <div key={i} className="text-sm flex gap-1">
                           <span className="font-medium">{f.label}</span>
                           <span className="text-gray-500">({f.type})</span>
                           {f.required && <span className="text-red-600">*</span>}
@@ -326,22 +326,22 @@ export function Clippy() {
                       ))}
                     </div>
                     <button
-                      className="text-xs px-3 py-1"
+                      className="text-sm px-3 py-1"
                       onClick={handleSaveForm}
                       disabled={isSaving}
                     >
                       {isSaving ? 'Saving...' : 'Save Form'}
                     </button>
                     {error && (
-                      <p className="text-xs text-red-700 mt-1">{error}</p>
+                      <p className="text-sm text-red-700 mt-1">{error}</p>
                     )}
                   </div>
                 )}
 
-                <div className="flex gap-1 shrink-0">
+                <div className="flex gap-1 shrink-0 items-end">
                   <textarea
-                    className="flex-1 text-xs resize-none border border-[#808080] p-1 leading-snug"
-                    rows={2}
+                    className="flex-1 text-base resize-none border border-[#808080] p-1 leading-snug"
+                    rows={1}
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -349,7 +349,7 @@ export function Clippy() {
                     disabled={isGenerating}
                   />
                   <button
-                    className="self-end px-3 py-1 text-xs"
+                    className="px-3 py-1 text-base"
                     onClick={handleSend}
                     disabled={isGenerating || !input.trim()}
                   >
