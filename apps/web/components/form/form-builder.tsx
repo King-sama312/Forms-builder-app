@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Win98Window } from '~/components/win98-window';
 import { FormFieldEditor } from './form-field-editor';
@@ -40,6 +40,16 @@ export function FormBuilder({ formId }: { formId: string }) {
     };
   }, [serverFields, loadFields, reset]);
 
+  const [copied, setCopied] = useState(false);
+
+  const copyShareLink = useCallback(() => {
+    const url = `${window.location.origin}/forms/${formId}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [formId]);
+
   const isLoading = formLoading || fieldsLoading;
 
   return (
@@ -62,6 +72,10 @@ export function FormBuilder({ formId }: { formId: string }) {
           </button>
           <button onClick={() => router.push(`/builder/${formId}/analytics`)}>
             📈 Analytics
+          </button>
+          <div className="flex-1" />
+          <button onClick={copyShareLink}>
+            {copied ? '✅ Copied!' : '🔗 Share'}
           </button>
         </div>
 
