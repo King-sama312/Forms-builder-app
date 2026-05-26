@@ -1,7 +1,20 @@
-import { db, eq, asc, desc } from "@repo/database";
+import { db, eq, asc, desc, and } from "@repo/database";
 import { formsTable } from "@repo/database/models/form";
 import { formFieldsTable } from "@repo/database/models/form_field";
-import { CreateFormInputType, createFormInput, ListFormsByUserIdInputType, listFormsByUserIdInput, GetFormByIdInputType, getFormByIdInput } from "./model";
+import {
+  CreateFormInputType,
+  createFormInput,
+  ListFormsByUserIdInputType,
+  listFormsByUserIdInput,
+  GetFormByIdInputType,
+  getFormByIdInput,
+  DeleteFormInputType,
+  deleteFormInput,
+  RestoreFormInputType,
+  restoreFormInput,
+  ListDeletedFormsInputType,
+  listDeletedFormsInput,
+} from "./model";
 
 class FormService {
   public async createForm(payload: CreateFormInputType) {
@@ -25,14 +38,32 @@ class FormService {
 
   public async listFormsByUserId(payload: ListFormsByUserIdInputType) {
     const { userId } = await listFormsByUserIdInput.parseAsync(payload);
-    
+
     const forms = await db
       .select()
       .from(formsTable)
-      .where(eq(formsTable.createdBy, userId))
+      .where(
+        and(eq(formsTable.createdBy, userId), eq(formsTable.isDeleted, false))
+      )
       .orderBy(desc(formsTable.createdAt));
 
     return forms;
+  }
+
+  public async getFormByIdIncludingDeleted(payload: GetFormByIdInputType) {
+    const { formId } = await getFormByIdInput.parseAsync(payload);
+
+    const [form] = await db
+      .select()
+      .from(formsTable)
+      .where(eq(formsTable.id, formId))
+      .limit(1);
+
+    if (!form) {
+      throw new Error(`Form not found`);
+    }
+
+    return form;
   }
 
   public async getFormById(payload: GetFormByIdInputType) {
@@ -41,7 +72,7 @@ class FormService {
     const [form] = await db
       .select()
       .from(formsTable)
-      .where(eq(formsTable.id, formId))
+      .where(and(eq(formsTable.id, formId), eq(formsTable.isDeleted, false)))
       .limit(1);
 
     if (!form) {
@@ -60,6 +91,52 @@ class FormService {
     }));
 
     return { ...form, fields };
+  }
+
+  public async deleteForm(payload: DeleteFormInputType) {
+    const { formId } = await deleteFormInput.parseAsync(payload);
+
+    const [form] = await db
+      .update(formsTable)
+      .set({ isDeleted: true, deletedAt: new Date() })
+      .where(eq(formsTable.id, formId))
+      .returning({ id: formsTable.id });
+
+    if (!form?.id) {
+      throw new Error(`Form not found or already deleted`);
+    }
+
+    return { id: form.id };
+  }
+
+  public async restoreForm(payload: RestoreFormInputType) {
+    const { formId } = await restoreFormInput.parseAsync(payload);
+
+    const [form] = await db
+      .update(formsTable)
+      .set({ isDeleted: false, deletedAt: null })
+      .where(eq(formsTable.id, formId))
+      .returning({ id: formsTable.id });
+
+    if (!form?.id) {
+      throw new Error(`Form not found`);
+    }
+
+    return { id: form.id };
+  }
+
+  public async listDeletedForms(payload: ListDeletedFormsInputType) {
+    const { userId } = await listDeletedFormsInput.parseAsync(payload);
+
+    const forms = await db
+      .select()
+      .from(formsTable)
+      .where(
+        and(eq(formsTable.createdBy, userId), eq(formsTable.isDeleted, true))
+      )
+      .orderBy(desc(formsTable.deletedAt));
+
+    return forms;
   }
 }
 

@@ -64,8 +64,9 @@ Maximum 4 forms in bulk. Only use this when the user explicitly requests multipl
 
 Respond with valid JSON only (no markdown, no code fences).`;
 
+    const model = process.env.ZAI_MODEL || 'GLM-4.5-air';
     const completion = await zai.chat.completions.create({
-      model: 'GLM-4.5-air',
+      model,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: prompt },

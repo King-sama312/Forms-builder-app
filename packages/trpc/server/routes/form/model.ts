@@ -147,3 +147,64 @@ export const reorderFieldsInputModel = z.object({
   formId: z.string().uuid().describe("UUID of the form"),
   fieldIds: z.array(z.string().uuid()).describe("Field IDs in new order"),
 });
+
+// Recycle bin models
+export const deleteFormInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form to delete"),
+});
+
+export const deleteFormOutputModel = z.object({
+  id: z.string().uuid().describe("ID of the deleted form"),
+});
+
+export const restoreFormInputModel = z.object({
+  formId: z.string().uuid().describe("UUID of the form to restore"),
+});
+
+export const restoreFormOutputModel = z.object({
+  id: z.string().uuid().describe("ID of the restored form"),
+});
+
+export const listDeletedFormsInputModel = z.undefined();
+
+export const listDeletedFormsOutputModel = z.array(
+  z.object({
+    id: z.string().uuid(),
+    title: z.string(),
+    description: z.string().nullable().optional(),
+    createdBy: z.string().uuid().nullable().optional(),
+    isDeleted: z.boolean(),
+    deletedAt: z.date().nullable().optional(),
+    createdAt: z.date().nullable().optional(),
+    updatedAt: z.date().nullable().optional(),
+  })
+);
+
+// Delete-form models
+export const recordDeletionInputModel = z.object({
+  entityType: z.enum(["FORM", "FORM_FIELD"]).describe("Type of entity being deleted"),
+  entityId: z.string().uuid().describe("UUID of the entity being deleted"),
+  formId: z.string().uuid().optional().describe("UUID of the form (for field deletions)"),
+  data: z.record(z.string(), z.any()).describe("Full snapshot of the deleted entity data"),
+});
+
+export const recordDeletionOutputModel = z.object({
+  id: z.string().uuid().describe("ID of the deletion record"),
+});
+
+const deletedEntityOutputModel = z.object({
+  id: z.string().uuid(),
+  entityType: z.string(),
+  entityId: z.string().uuid(),
+  formId: z.string().uuid().nullable().optional(),
+  data: z.record(z.string(), z.any()),
+  deletedBy: z.string().uuid().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+});
+
+export const listDeletedEntitiesInputModel = z.object({
+  entityType: z.enum(["FORM", "FORM_FIELD"]).optional().describe("Filter by entity type"),
+  formId: z.string().uuid().optional().describe("Filter by form ID"),
+});
+
+export const listDeletedEntitiesOutputModel = z.array(deletedEntityOutputModel);

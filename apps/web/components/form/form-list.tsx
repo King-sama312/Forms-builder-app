@@ -1,11 +1,19 @@
 'use client';
 
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useListForms } from '~/hooks/api/form/index';
+import { useListForms, useDeleteForm } from '~/hooks/api/form/index';
 
 export function FormList() {
   const router = useRouter();
   const { forms, isLoading, isError } = useListForms();
+  const { deleteFormAsync, isPending: isDeleting } = useDeleteForm();
+  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+
+  const handleDelete = async (formId: string) => {
+    await deleteFormAsync({ formId });
+    setConfirmingId(null);
+  };
 
   if (isLoading) {
     return (
@@ -30,7 +38,7 @@ export function FormList() {
     return (
       <div className="p-4 text-sm text-gray-600">
         <p>No forms yet.</p>
-        <p className="mt-1">Click "New Form" to create one.</p>
+        <p className="mt-1">Click &ldquo;New Form&rdquo; to create one.</p>
       </div>
     );
   }
@@ -52,6 +60,35 @@ export function FormList() {
           <span className="text-xs whitespace-nowrap">
             {new Date(form.createdAt).toLocaleDateString()}
           </span>
+          {confirmingId === form.id ? (
+            <div className="flex items-center gap-1">
+              <span className="text-xs">Move to Recycle Bin?</span>
+              <button
+                className="text-xs px-1 py-0.5"
+                onClick={() => handleDelete(form.id)}
+                disabled={isDeleting}
+              >
+                Yes
+              </button>
+              <button
+                className="text-xs px-1 py-0.5"
+                onClick={() => setConfirmingId(null)}
+              >
+                No
+              </button>
+            </div>
+          ) : (
+            <button
+              className="text-xs px-1 py-0.5 opacity-60 hover:opacity-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                setConfirmingId(form.id);
+              }}
+              title="Move to Recycle Bin"
+            >
+              🗑
+            </button>
+          )}
         </div>
       ))}
     </div>

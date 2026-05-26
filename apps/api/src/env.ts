@@ -4,6 +4,17 @@ const envSchema = z.object({
   PORT: z.string().optional(),
   NODE_ENV: z.enum(["development", "prod"]).default("development"),
   BASE_URL: z.string().default("http://localhost:8000"),
+  CORS_ORIGIN: z.string().default("http://localhost:3000"),
+  APP_NAME: z.string().default("Streamyst"),
+  COOKIE_SECURE: z
+    .string()
+    .optional()
+    .transform((v) => (v !== undefined ? v === "true" : undefined)),
+  COOKIE_DOMAIN: z.string().optional(),
+  SESSION_DURATION_MS: z
+    .string()
+    .optional()
+    .transform((v) => (v ? parseInt(v, 10) : undefined)),
 });
 
 function createEnv(env: NodeJS.ProcessEnv) {

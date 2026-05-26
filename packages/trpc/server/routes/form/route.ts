@@ -1,5 +1,5 @@
 import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
-import { formService, formFieldService, formSubmissionService } from "../../services";
+import { formService, formFieldService, formSubmissionService, deleteFormService } from "../../services";
 import { generatePath } from "../../utils/path-generator";
 import {
   createFormInputModel,
@@ -22,6 +22,16 @@ import {
   updateFieldsOutputModel,
   deleteFieldInputModel,
   reorderFieldsInputModel,
+  deleteFormInputModel,
+  deleteFormOutputModel,
+  restoreFormInputModel,
+  restoreFormOutputModel,
+  listDeletedFormsInputModel,
+  listDeletedFormsOutputModel,
+  recordDeletionInputModel,
+  recordDeletionOutputModel,
+  listDeletedEntitiesInputModel,
+  listDeletedEntitiesOutputModel,
 } from "./model";
 
 const TAGS = ["Form"];
@@ -213,6 +223,71 @@ export const formRouter = router({
         formId: input.formId,
         fieldIds: input.fieldIds,
       });
+      return result;
+    }),
+
+  deleteForm: authenticatedProcedure
+    .meta({
+      openapi: { method: "DELETE", path: getPath("/deleteForm"), tags: TAGS, protect: true },
+    })
+    .input(deleteFormInputModel)
+    .output(deleteFormOutputModel)
+    .mutation(async ({ ctx, input }) => {
+      const form = await formService.getFormById({ formId: input.formId });
+      if (form.createdBy !== ctx.user.id) {
+        throw new Error("Unauthorized");
+      }
+
+      const result = await formService.deleteForm({ formId: input.formId });
+      return result;
+    }),
+
+  restoreForm: authenticatedProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/restoreForm"), tags: TAGS, protect: true },
+    })
+    .input(restoreFormInputModel)
+    .output(restoreFormOutputModel)
+    .mutation(async ({ ctx, input }) => {
+      const form = await formService.getFormByIdIncludingDeleted({ formId: input.formId });
+      if (form.createdBy !== ctx.user.id) {
+        throw new Error("Unauthorized");
+      }
+
+      const result = await formService.restoreForm({ formId: input.formId });
+      return result;
+    }),
+
+  listDeletedForms: authenticatedProcedure
+    .meta({
+      openapi: { method: "GET", path: getPath("/listDeletedForms"), tags: TAGS, protect: true },
+    })
+    .input(listDeletedFormsInputModel)
+    .output(listDeletedFormsOutputModel)
+    .query(async ({ ctx }) => {
+      const forms = await formService.listDeletedForms({ userId: ctx.user.id });
+      return forms;
+    }),
+
+  recordDeletion: authenticatedProcedure
+    .meta({
+      openapi: { method: "POST", path: getPath("/recordDeletion"), tags: TAGS, protect: true },
+    })
+    .input(recordDeletionInputModel)
+    .output(recordDeletionOutputModel)
+    .mutation(async ({ input }) => {
+      const result = await deleteFormService.recordDeletion(input);
+      return result;
+    }),
+
+  listDeletedEntities: authenticatedProcedure
+    .meta({
+      openapi: { method: "GET", path: getPath("/listDeletedEntities"), tags: TAGS, protect: true },
+    })
+    .input(listDeletedEntitiesInputModel)
+    .output(listDeletedEntitiesOutputModel)
+    .query(async ({ input }) => {
+      const result = await deleteFormService.listDeletedEntities(input);
       return result;
     }),
 });

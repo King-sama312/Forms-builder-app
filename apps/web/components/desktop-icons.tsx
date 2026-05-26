@@ -19,13 +19,22 @@ export function DesktopIcons() {
   return (
     <div className="absolute top-4 left-4 flex flex-col gap-6 z-0">
       {user ? (
-        <Icon
-          label="My Forms"
-          onClick={() => router.push('/forms')}
-          icon={
-            <img src="/icons/forms.png" alt="My Forms" className="w-full h-full pixel-art" draggable={false} />
-          }
-        />
+        <>
+          <Icon
+            label="My Forms"
+            onClick={() => router.push('/forms')}
+            icon={
+              <img src="/icons/forms.png" alt="My Forms" className="w-full h-full pixel-art" draggable={false} />
+            }
+          />
+          <Icon
+            label="Recycle Bin"
+            onClick={() => router.push('/forms/recycle-bin')}
+            icon={
+              <div className="w-full h-full flex items-center justify-center text-3xl">🗑</div>
+            }
+          />
+        </>
       ) : (
         <>
           <Icon

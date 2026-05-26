@@ -24,6 +24,9 @@ export default function FormsPage() {
           <button onClick={() => router.push('/forms/create-form')}>
             📄 New Form
           </button>
+          <button onClick={() => router.push('/forms/recycle-bin')}>
+            🗑 Recycle Bin
+          </button>
           <button onClick={handleRefresh}>
             🔄 Refresh
           </button>

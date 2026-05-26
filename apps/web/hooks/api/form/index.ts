@@ -204,3 +204,95 @@ export const useFormBuilderSync = (formId: string) => {
 
   return { save, isSaving };
 };
+
+export const useRecordDeletion = () => {
+  const utils = trpc.useUtils();
+
+  const {
+    mutateAsync: recordDeletionAsync,
+    mutate: recordDeletion,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isSuccess,
+    status,
+  } = trpc.form.recordDeletion.useMutation({
+    onSuccess: async () => {
+      await utils.form.invalidate();
+    },
+  });
+
+  return { recordDeletionAsync, recordDeletion, error, failureCount, isError, isIdle, isSuccess, status };
+};
+
+export const useDeleteForm = () => {
+  const utils = trpc.useUtils();
+
+  const {
+    mutateAsync: deleteFormAsync,
+    mutate: deleteForm,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isPending,
+    isSuccess,
+    status,
+  } = trpc.form.deleteForm.useMutation({
+    onSuccess: async () => {
+      await utils.form.listForms.invalidate();
+    },
+  });
+
+  return { deleteFormAsync, deleteForm, error, failureCount, isError, isIdle, isPending, isSuccess, status };
+};
+
+export const useRestoreForm = () => {
+  const utils = trpc.useUtils();
+
+  const {
+    mutateAsync: restoreFormAsync,
+    mutate: restoreForm,
+    error,
+    failureCount,
+    isError,
+    isIdle,
+    isPending,
+    isSuccess,
+    status,
+  } = trpc.form.restoreForm.useMutation({
+    onSuccess: async () => {
+      await utils.form.listForms.invalidate();
+      await utils.form.listDeletedForms.invalidate();
+    },
+  });
+
+  return { restoreFormAsync, restoreForm, error, failureCount, isError, isIdle, isPending, isSuccess, status };
+};
+
+export const useListDeletedForms = () => {
+  const {
+    data: deletedForms,
+    isError,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.listDeletedForms.useQuery(undefined);
+
+  return { deletedForms, isError, isFetched, isFetching, isLoading, status };
+};
+
+export const useListDeletedEntities = () => {
+  const {
+    data: deletedEntities,
+    isError,
+    isFetched,
+    isFetching,
+    isLoading,
+    status,
+  } = trpc.form.listDeletedEntities.useQuery({});
+
+  return { deletedEntities, isError, isFetched, isFetching, isLoading, status };
+};

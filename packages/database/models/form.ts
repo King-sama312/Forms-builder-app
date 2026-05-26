@@ -8,6 +8,9 @@ export const formsTable = pgTable("forms", {
 
   createdBy: uuid("created_by").references(() => usersTable.id),
 
+  isDeleted: boolean("is_deleted").default(false).notNull(),
+  deletedAt: timestamp("deleted_at"),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").$onUpdate(() => new Date()),
 });
