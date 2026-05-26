@@ -17,7 +17,9 @@ export function Taskbar({ onShutdown }: { onShutdown?: () => void }) {
     if (minimized) {
       restoreWindow(id);
     }
-    router.push(pathname);
+    if (pathname !== currentPathname) {
+      router.push(pathname);
+    }
   };
 
   return (

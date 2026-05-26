@@ -11,6 +11,8 @@ interface Win98WindowProps {
   defaultPosition?: { x: number; y: number; width: number; height: number };
   onClose?: () => void;
   noClose?: boolean;
+  fixed?: boolean;
+  windowId?: string;
 }
 
 const TASKBAR_HEIGHT = 28;
@@ -21,11 +23,13 @@ export function Win98Window({
   defaultPosition = { x: 120, y: 100, width: 500, height: 350 },
   onClose,
   noClose = false,
+  fixed = false,
+  windowId,
 }: Win98WindowProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { minimizeWindow, isMinimized, registerWindow, unregisterWindow, setWindowMaximized } = useWindows();
-  const windowIdRef = useRef<string>(Math.random().toString(36).substr(2, 9));
+  const windowIdRef = useRef<string>(windowId ?? Math.random().toString(36).substr(2, 9));
 
   const [windowState, setWindowState] = useState<'normal' | 'maximized'>('normal');
   const [position, setPosition] = useState({ x: defaultPosition.x, y: defaultPosition.y });
@@ -84,14 +88,14 @@ export function Win98Window({
       position={{ x: position.x, y: position.y }}
       size={{ width: size.width, height: size.height }}
       dragHandleClassName="title-bar"
-      bounds="parent"
       minWidth={300}
       minHeight={200}
       onDragStop={handleDragStop}
       onResizeStop={handleResizeStop}
       disableDragging={isMaximized}
       enableResizing={!isMaximized}
-      style={{ position: 'absolute', zIndex: 50 }}
+      bounds={fixed ? 'window' : 'parent'}
+      style={{ position: fixed ? 'fixed' : 'absolute', zIndex: 50 }}
     >
       <div className="window flex flex-col w-full h-full bg-[#c0c0c0]">
         <div className="title-bar">
