@@ -133,7 +133,7 @@ export function FormFieldEditor({ formId }: { formId: string }) {
                     >
                       <span
                         className={`inline-block h-3 w-3 border border-[#808080] bg-white transition-transform ${
-                          field.required ? 'translate-x-[18px]' : 'translate-x-[2px]'
+                          field.required ? 'translate-x-4.5' : 'translate-x-0.5'
                         }`}
                       />
                     </span>

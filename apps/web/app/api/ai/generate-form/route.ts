@@ -55,8 +55,12 @@ export async function POST(request: NextRequest) {
 If the user sends chit-chat (hi, hello, how are you, etc.), respond with:
 {"type":"chat","text":"your reply here — scold them for wasting tokens and steer to form building"}
 
-If the user asks to build a form, respond with:
+If the user asks to build a single form, respond with:
 {"type":"form","title":"string (max 55 chars)","description":"string (max 30 chars, optional)","fields":[{"type":"text|number|email|select|checkbox|textarea|radio","label":"string (max 100 chars)","placeholder":"string (optional)","required":boolean,"options":["option1","option2"] (only for select/checkbox/radio),"order":number}]}
+
+If the user asks to build multiple distinct forms (e.g., "create forms for X, Y, and Z"), respond with:
+{"type":"bulk-forms","forms":[{"title":"string (max 55 chars)","description":"string (max 30 chars, optional)","fields":[ ... same field format as above ... ]}]}
+Maximum 4 forms in bulk. Only use this when the user explicitly requests multiple different forms.
 
 Respond with valid JSON only (no markdown, no code fences).`;
 
@@ -81,6 +85,11 @@ Respond with valid JSON only (no markdown, no code fences).`;
 
     if (parsed.type === 'chat') {
       return NextResponse.json({ type: 'chat', text: parsed.text });
+    }
+
+    if (parsed.type === 'bulk-forms') {
+      const forms = (parsed.forms || []).slice(0, 4);
+      return NextResponse.json({ type: 'bulk-forms', forms });
     }
 
     return NextResponse.json({ type: 'form', ...parsed });

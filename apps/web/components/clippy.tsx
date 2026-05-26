@@ -30,7 +30,8 @@ interface GeneratedForm {
 
 type ClippyResponse =
   | { type: 'chat'; text: string }
-  | { type: 'form'; title: string; description?: string; fields: GeneratedField[] };
+  | { type: 'form'; title: string; description?: string; fields: GeneratedField[] }
+  | { type: 'bulk-forms'; forms: GeneratedForm[] };
 
 type FieldType = 'text' | 'number' | 'email' | 'select' | 'checkbox' | 'textarea' | 'radio';
 
@@ -51,7 +52,13 @@ const TIPS = [
   "Psst... I can build forms while you relax.",
   "You can ask me for a contact form, survey, registration, and more!",
   "Don't want to drag and drop? Just chat with me!",
+  "I can generate multiple forms at once — try asking for a few!",
 ];
+
+interface SavedFormInfo {
+  id: string;
+  title: string;
+}
 
 export function Clippy() {
   const router = useRouter();
@@ -66,8 +73,11 @@ export function Clippy() {
   const [showBubble, setShowBubble] = useState(false);
   const [bubbleMessage, setBubbleMessage] = useState('');
   const [showLoginBubble, setShowLoginBubble] = useState(false);
-  const [generatedForm, setGeneratedForm] = useState<GeneratedForm | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
+  const [generatedForms, setGeneratedForms] = useState<GeneratedForm[]>([]);
+  const [savingStates, setSavingStates] = useState<Record<number, boolean>>({});
+  const [saveErrors, setSaveErrors] = useState<Record<number, string>>({});
+  const [savedForms, setSavedForms] = useState<SavedFormInfo[]>([]);
+  const [isSavingAll, setIsSavingAll] = useState(false);
   const [error, setError] = useState('');
   const [chatPosition, setChatPosition] = useState({ x: 0, y: 0 });
   const { windows } = useWindows();
@@ -125,13 +135,14 @@ export function Clippy() {
       loginTimerRef.current = setTimeout(() => router.push('/login'), 2500);
     } else if (isChatOpen) {
       setIsChatOpen(false);
-      setGeneratedForm(null);
+      setGeneratedForms([]);
+      setSavedForms([]);
     } else {
       setIsChatOpen(true);
       if (messages.length === 0) {
         setMessages([{
           role: 'clippy',
-          text: "Hi! I'm Clippy! Tell me what kind of form you want to build and I'll generate it for you!",
+          text: "Hi! I'm Clippy! Tell me what kind of form you want to build and I'll generate it for you! I can even make multiple forms at once!",
         }]);
       }
     }
@@ -143,7 +154,9 @@ export function Clippy() {
     const userMsg = input.trim();
     setInput('');
     setError('');
-    setGeneratedForm(null);
+    setGeneratedForms([]);
+    setSavedForms([]);
+    setSaveErrors({});
     setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
     setIsGenerating(true);
 
@@ -167,12 +180,18 @@ export function Clippy() {
 
       if (data.type === 'chat') {
         setMessages(prev => [...prev, { role: 'clippy', text: data.text }]);
+      } else if (data.type === 'bulk-forms') {
+        setGeneratedForms(data.forms);
+        setMessages(prev => [...prev, {
+          role: 'clippy',
+          text: `I've created ${data.forms.length} forms for you! Take a look below and save the ones you like.`,
+        }]);
       } else {
+        setGeneratedForms([data]);
         setMessages(prev => [...prev, {
           role: 'clippy',
           text: `I've created a form called "${data.title}" with ${data.fields.length} field${data.fields.length === 1 ? '' : 's'}. Take a look below!`,
         }]);
-        setGeneratedForm(data);
       }
     } catch (err: any) {
       setMessages(prev => prev.slice(0, -1));
@@ -185,20 +204,19 @@ export function Clippy() {
     }
   };
 
-  const handleSaveForm = async () => {
-    if (!generatedForm) return;
-    setIsSaving(true);
-    setError('');
+  const doSaveForm = async (form: GeneratedForm, index: number): Promise<string | null> => {
+    setSavingStates(prev => ({ ...prev, [index]: true }));
+    setSaveErrors(prev => ({ ...prev, [index]: '' }));
 
     try {
       const result = await createFormAsync({
-        title: generatedForm.title,
-        description: generatedForm.description || undefined,
+        title: form.title,
+        description: form.description || undefined,
       });
       const formId = (result as any)?.id;
       if (!formId) throw new Error('No form ID returned');
 
-      const fields = generatedForm.fields.map((f, i) => ({
+      const fields = form.fields.map((f, i) => ({
         type: sanitizeFieldType(f.type),
         label: f.label,
         placeholder: f.placeholder || undefined,
@@ -209,22 +227,62 @@ export function Clippy() {
 
       await updateFieldsMutation.mutateAsync({ formId, fields });
 
+      setSavedForms(prev => [...prev, { id: formId, title: form.title }]);
+      return formId;
+    } catch (err: any) {
+      setSaveErrors(prev => ({ ...prev, [index]: err.message || 'Failed to save' }));
+      return null;
+    } finally {
+      setSavingStates(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
+  const handleSaveForm = async (form: GeneratedForm, index: number) => {
+    const formId = await doSaveForm(form, index);
+    if (formId) {
       setMessages(prev => [...prev, {
         role: 'clippy',
-        text: 'Form saved! Opening it in the builder...',
+        text: `"${form.title}" saved!`,
       }]);
-
-      setTimeout(() => router.push(`/builder/${formId}`), 500);
-    } catch (err: any) {
-      setError(err.message || 'Failed to save form');
-    } finally {
-      setIsSaving(false);
     }
+  };
+
+  const handleSaveAll = async () => {
+    if (isSavingAll) return;
+    setIsSavingAll(true);
+
+    const saved: SavedFormInfo[] = [];
+
+    for (let i = 0; i < generatedForms.length; i++) {
+      const form = generatedForms[i];
+      if (!form) continue;
+      const alreadyDone = savedForms.some(sf => sf.title === form.title);
+      if (alreadyDone) {
+        const existing = savedForms.find(sf => sf.title === form.title);
+        if (existing) saved.push(existing);
+        continue;
+      }
+      const formId = await doSaveForm(form, i);
+      if (formId) {
+        saved.push({ id: formId, title: form.title });
+      }
+    }
+
+    setIsSavingAll(false);
+
+    const savedNames = saved.map(s => s.title);
+    setMessages(prev => [...prev, {
+      role: 'clippy',
+      text: savedNames.length > 0
+        ? `All done! Here's what was saved:\n${savedNames.map(n => `• ${n}`).join('\n')}`
+        : 'Something went wrong. None of the forms could be saved.',
+    }]);
   };
 
   const handleCloseChat = useCallback(() => {
     setIsChatOpen(false);
-    setGeneratedForm(null);
+    setGeneratedForms([]);
+    setSavedForms([]);
   }, []);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -314,32 +372,85 @@ export function Clippy() {
               <div ref={messagesEndRef} />
             </div>
 
-            {generatedForm && (
-              <div className="border border-[#808080] bg-[#ffffcc] p-2 shrink-0">
-                <p className="text-sm font-bold mb-1">Preview: {generatedForm.title}</p>
-                {generatedForm.description && (
-                  <p className="text-sm mb-1 text-gray-600">{generatedForm.description}</p>
-                )}
-                <div className="space-y-0.5 mb-2">
-                  {generatedForm.fields.map((f, i) => (
-                    <div key={i} className="text-sm flex gap-1">
-                      <span className="font-medium">{f.label}</span>
-                      <span className="text-gray-500">({f.type})</span>
-                      {f.required && <span className="text-red-600">*</span>}
+            {generatedForms.length > 0 && (
+              <div className="border border-[#808080] bg-[#ffffcc] p-2 shrink-0 max-h-64 overflow-y-auto space-y-2">
+                {generatedForms.map((form, i) => {
+                  const saved = savedForms.find(sf => sf.title === form.title);
+                  return (
+                    <div key={i} className="border border-[#808080] bg-white p-2">
+                      <p className="text-sm font-bold mb-1">{form.title}</p>
+                      {form.description && (
+                        <p className="text-sm mb-1 text-gray-600">{form.description}</p>
+                      )}
+                      <div className="space-y-0.5 mb-2">
+                        {form.fields.map((f, j) => (
+                          <div key={j} className="text-sm flex gap-1">
+                            <span className="font-medium">{f.label}</span>
+                            <span className="text-gray-500">({f.type})</span>
+                            {f.required && <span className="text-red-600">*</span>}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-1">
+                        {saved ? (
+                          <>
+                            <button
+                              className="text-sm px-3 py-1 bg-[#c0c0c0] border border-[#808080] cursor-default"
+                              disabled
+                            >
+                              Saved
+                            </button>
+                            <button
+                              className="text-sm px-3 py-1"
+                              onClick={() => router.push(`/builder/${saved.id}`)}
+                            >
+                              Open
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            className="text-sm px-3 py-1"
+                            onClick={() => handleSaveForm(form, i)}
+                            disabled={savingStates[i]}
+                          >
+                            {savingStates[i] ? 'Saving...' : 'Save'}
+                          </button>
+                        )}
+                      </div>
+                      {saveErrors[i] && (
+                        <p className="text-sm text-red-700 mt-1">{saveErrors[i]}</p>
+                      )}
                     </div>
-                  ))}
-                </div>
-                <button
-                  className="text-sm px-3 py-1"
-                  onClick={handleSaveForm}
-                  disabled={isSaving}
-                >
-                  {isSaving ? 'Saving...' : 'Save Form'}
-                </button>
-                {error && (
-                  <p className="text-sm text-red-700 mt-1">{error}</p>
+                  );
+                })}
+                {generatedForms.length > 1 && savedForms.length < generatedForms.length && (
+                  <button
+                    className="text-sm px-3 py-1 w-full"
+                    onClick={handleSaveAll}
+                    disabled={isSavingAll}
+                  >
+                    {isSavingAll ? 'Saving All...' : `Save All (${generatedForms.length})`}
+                  </button>
+                )}
+                {savedForms.length > 0 && (
+                  <div className="text-sm border-t border-[#808080] pt-2 mt-2">
+                    <p className="font-bold mb-1">Saved forms:</p>
+                    {savedForms.map((sf, i) => (
+                      <button
+                        key={i}
+                        className="text-[#0000ff] underline text-sm block"
+                        onClick={() => router.push(`/builder/${sf.id}`)}
+                      >
+                        {sf.title}
+                      </button>
+                    ))}
+                  </div>
                 )}
               </div>
+            )}
+
+            {error && (
+              <p className="text-sm text-red-700">{error}</p>
             )}
 
             <div className="flex gap-1 shrink-0 items-end">
