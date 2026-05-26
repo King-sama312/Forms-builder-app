@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { authenticatedProcedure, publicProcedure, router } from "../../trpc";
 import { formService, formFieldService, formSubmissionService, deleteFormService } from "../../services";
 import { generatePath } from "../../utils/path-generator";
@@ -32,6 +33,9 @@ import {
   recordDeletionOutputModel,
   listDeletedEntitiesInputModel,
   listDeletedEntitiesOutputModel,
+  getFormAnalyticsInputModel,
+  getFormAnalyticsOutputModel,
+  getGlobalAnalyticsOutputModel,
 } from "./model";
 
 const TAGS = ["Form"];
@@ -289,5 +293,46 @@ export const formRouter = router({
     .query(async ({ input }) => {
       const result = await deleteFormService.listDeletedEntities(input);
       return result;
+    }),
+
+  getAnalytics: authenticatedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: getPath("/getAnalytics"),
+        tags: TAGS,
+        protect: true,
+      },
+    })
+    .input(getFormAnalyticsInputModel)
+    .output(getFormAnalyticsOutputModel)
+    .query(async ({ input }) => {
+      const result = await formSubmissionService.getFormAnalytics(input);
+      return result;
+    }),
+
+  getGlobalAnalytics: authenticatedProcedure
+    .meta({
+      openapi: {
+        method: "GET",
+        path: getPath("/getGlobalAnalytics"),
+        tags: TAGS,
+        protect: true,
+      },
+    })
+    .input(z.undefined())
+    .output(getGlobalAnalyticsOutputModel)
+    .query(async ({ ctx }) => {
+      const userId = ctx.user.id;
+
+      const [totalForms, totalSubmissions, formsRanked, submissionActivity] =
+        await Promise.all([
+          formService.getTotalFormCount(userId),
+          formSubmissionService.getAllSubmissionsCount(userId),
+          formSubmissionService.getFormsRankedBySubmissions(userId),
+          formSubmissionService.getGlobalSubmissionTimeline(userId),
+        ]);
+
+      return { totalForms, totalSubmissions, formsRanked, submissionActivity };
     }),
 });

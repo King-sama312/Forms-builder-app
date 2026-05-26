@@ -296,3 +296,5 @@ export const useListDeletedEntities = () => {
 
   return { deletedEntities, isError, isFetched, isFetching, isLoading, status };
 };
+
+export { useGetFormAnalytics, useGetGlobalAnalytics } from "./analytics";

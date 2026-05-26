@@ -17,3 +17,34 @@ export const getFormSubmissionsInput = z.object({
 });
 
 export type GetFormSubmissionsInputType = z.infer<typeof getFormSubmissionsInput>;
+
+export const getFormAnalyticsInput = z.object({
+  formId: z.string().uuid().describe("UUID of the form"),
+});
+
+export type GetFormAnalyticsInputType = z.infer<typeof getFormAnalyticsInput>;
+
+export const fieldDistributionValueSchema = z.object({
+  value: z.string(),
+  count: z.number(),
+});
+
+export const fieldDistributionSchema = z.object({
+  fieldId: z.string().uuid(),
+  fieldLabel: z.string(),
+  values: z.array(fieldDistributionValueSchema),
+});
+
+export const timelinePointSchema = z.object({
+  date: z.string(),
+  count: z.number(),
+});
+
+export const getFormAnalyticsOutput = z.object({
+  totalSubmissions: z.number(),
+  submissionsToday: z.number(),
+  timeline: z.array(timelinePointSchema),
+  fieldDistributions: z.array(fieldDistributionSchema),
+});
+
+export type GetFormAnalyticsOutputType = z.infer<typeof getFormAnalyticsOutput>;

@@ -208,3 +208,44 @@ export const listDeletedEntitiesInputModel = z.object({
 });
 
 export const listDeletedEntitiesOutputModel = z.array(deletedEntityOutputModel);
+
+// Analytics models
+export const getFormAnalyticsInputModel = z.object({
+  formId: z.string().uuid(),
+});
+
+const fieldDistributionValueModel = z.object({
+  value: z.string(),
+  count: z.number(),
+});
+
+const fieldDistributionModel = z.object({
+  fieldId: z.string().uuid(),
+  fieldLabel: z.string(),
+  values: z.array(fieldDistributionValueModel),
+});
+
+const timelinePointModel = z.object({
+  date: z.string(),
+  count: z.number(),
+});
+
+export const getFormAnalyticsOutputModel = z.object({
+  totalSubmissions: z.number(),
+  submissionsToday: z.number(),
+  timeline: z.array(timelinePointModel),
+  fieldDistributions: z.array(fieldDistributionModel),
+});
+
+const formRankedModel = z.object({
+  formId: z.string().uuid(),
+  title: z.string(),
+  submissionCount: z.number(),
+});
+
+export const getGlobalAnalyticsOutputModel = z.object({
+  totalForms: z.number(),
+  totalSubmissions: z.number(),
+  formsRanked: z.array(formRankedModel),
+  submissionActivity: z.array(timelinePointModel),
+});

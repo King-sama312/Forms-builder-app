@@ -60,6 +60,9 @@ export function FormBuilder({ formId }: { formId: string }) {
           <button onClick={() => router.push(`/builder/${formId}/submissions`)}>
             📊 Submissions
           </button>
+          <button onClick={() => router.push(`/builder/${formId}/analytics`)}>
+            📈 Analytics
+          </button>
         </div>
 
         {isLoading ? (

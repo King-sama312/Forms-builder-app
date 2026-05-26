@@ -53,6 +53,15 @@ export function DesktopIcons() {
           />
         </>
       )}
+      {user && (
+        <Icon
+          label="My Analytics"
+          onClick={() => router.push('/analytics')}
+          icon={
+            <div className="w-full h-full flex items-center justify-center text-3xl">📈</div>
+          }
+        />
+      )}
       <Icon
         label="Music Player"
         onClick={() => router.push('/music-player')}

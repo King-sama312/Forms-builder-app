@@ -1,4 +1,4 @@
-import { db, eq, asc, desc, and } from "@repo/database";
+import { db, eq, asc, desc, and, count } from "@repo/database";
 import { formsTable } from "@repo/database/models/form";
 import { formFieldsTable } from "@repo/database/models/form_field";
 import {
@@ -137,6 +137,16 @@ class FormService {
       .orderBy(desc(formsTable.deletedAt));
 
     return forms;
+  }
+
+  public async getTotalFormCount(userId: string) {
+    const [result] = await db
+      .select({ count: count() })
+      .from(formsTable)
+      .where(
+        and(eq(formsTable.createdBy, userId), eq(formsTable.isDeleted, false))
+      );
+    return result?.count ?? 0;
   }
 }
 
