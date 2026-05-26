@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useGetFormById, useGetFormFields, useCreateFormSubmission } from '~/hooks/api/form/index';
 import { Win98Window } from '~/components/win98-window';
 
@@ -76,16 +76,17 @@ export function FormPreview({ formId, onClose }: { formId: string; onClose: () =
                     onChange={(e) => handleChange(field.id, e.target.value)}
                   >
                     <option value="">-- Select --</option>
-                    {field.options?.map((opt: string) => (
+                    {field.options?.filter(Boolean).map((opt: string) => (
                       <option key={opt} value={opt}>{opt}</option>
                     ))}
                   </select>
                 ) : field.type === 'checkbox' ? (
                   <div className="flex flex-col gap-1">
-                    {field.options?.map((opt: string) => (
-                      <label key={opt} className="flex items-center gap-2 text-sm">
+                    {field.options?.filter(Boolean).map((opt: string, i: number) => (
+                      <React.Fragment key={`${field.id}-${i}`}>
                         <input
                           type="checkbox"
+                          id={`${field.id}-chk-${i}`}
                           value={opt}
                           checked={(values[field.id] ?? '').split(', ').includes(opt)}
                           onChange={(e) => {
@@ -96,24 +97,29 @@ export function FormPreview({ formId, onClose }: { formId: string; onClose: () =
                             handleChange(field.id, next.join(', '));
                           }}
                         />
-                        {opt}
-                      </label>
+                        <label htmlFor={`${field.id}-chk-${i}`} className="text-sm">
+                          {opt}
+                        </label>
+                      </React.Fragment>
                     ))}
                   </div>
                 ) : field.type === 'radio' ? (
                   <div className="flex flex-col gap-1">
-                    {field.options?.map((opt: string) => (
-                      <label key={opt} className="flex items-center gap-2 text-sm">
-                          <input
-                            type="radio"
-                            name={field.id}
-                            value={opt}
-                            required={field.isRequired ?? field.required}
-                            checked={values[field.id] === opt}
-                            onChange={(e) => handleChange(field.id, e.target.value)}
-                          />
-                        {opt}
-                      </label>
+                    {field.options?.filter(Boolean).map((opt: string, i: number) => (
+                      <React.Fragment key={`${field.id}-${i}`}>
+                        <input
+                          type="radio"
+                          id={`${field.id}-rad-${i}`}
+                          name={field.id}
+                          value={opt}
+                          required={field.isRequired ?? field.required}
+                          checked={values[field.id] === opt}
+                          onChange={(e) => handleChange(field.id, e.target.value)}
+                        />
+                        <label htmlFor={`${field.id}-rad-${i}`} className="text-sm">
+                          {opt}
+                        </label>
+                      </React.Fragment>
                     ))}
                   </div>
                 ) : (

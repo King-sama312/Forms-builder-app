@@ -149,7 +149,7 @@ export function FormFieldEditor({ formId }: { formId: string }) {
                       value={field.options?.join(', ') ?? ''}
                       onChange={(e) =>
                         updateField(field.id, {
-                          options: e.target.value.split(',').map((s) => s.trim()).filter(Boolean),
+                          options: e.target.value.split(',').map((s) => s.trim()),
                         })
                       }
                       placeholder="Option 1, Option 2, Option 3"

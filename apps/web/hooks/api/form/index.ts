@@ -192,7 +192,7 @@ export const useFormBuilderSync = (formId: string) => {
       label: f.label || "Untitled",
       placeholder: f.placeholder ?? undefined,
       required: f.required,
-      options: f.options ?? undefined,
+      options: f.options?.filter(Boolean) ?? undefined,
       order: f.order,
     }));
 

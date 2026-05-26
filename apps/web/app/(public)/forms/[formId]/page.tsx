@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useGetFormById, useCreateFormSubmission } from '~/hooks/api/form/index';
 
@@ -93,44 +93,50 @@ export default function PublicFormPage() {
                       onChange={(e) => handleChange(field.id, e.target.value)}
                     >
                       <option value="">-- Select --</option>
-                      {field.options?.map((opt: string) => (
+                      {field.options?.filter(Boolean).map((opt: string) => (
                         <option key={opt} value={opt}>{opt}</option>
                       ))}
                     </select>
-                  ) : field.type === 'checkbox' ? (
-                    <div className="flex flex-col gap-1">
-                      {field.options?.map((opt: string) => (
-                        <label key={opt} className="flex items-center gap-2 text-sm">
-                          <input
-                            type="checkbox"
-                            value={opt}
-                            checked={(values[field.id] ?? '').split(', ').includes(opt)}
-                            onChange={(e) => {
-                              const current = (values[field.id] ?? '').split(', ').filter(Boolean);
-                              const next = e.target.checked ? [...current, opt] : current.filter((c) => c !== opt);
-                              handleChange(field.id, next.join(', '));
-                            }}
-                          />
-                          {opt}
-                        </label>
-                      ))}
-                    </div>
-                  ) : field.type === 'radio' ? (
-                    <div className="flex flex-col gap-1">
-                      {field.options?.map((opt: string) => (
-                        <label key={opt} className="flex items-center gap-2 text-sm">
-                          <input
-                            type="radio"
-                            name={field.id}
-                            value={opt}
-                            required={field.isRequired ?? field.required}
-                            checked={values[field.id] === opt}
-                            onChange={(e) => handleChange(field.id, e.target.value)}
-                          />
-                          {opt}
-                        </label>
-                      ))}
-                    </div>
+                    ) : field.type === 'checkbox' ? (
+                      <div className="flex flex-col gap-1">
+                        {field.options?.filter(Boolean).map((opt: string, i: number) => (
+                          <React.Fragment key={`${field.id}-${i}`}>
+                            <input
+                              type="checkbox"
+                              id={`${field.id}-chk-${i}`}
+                              value={opt}
+                              checked={(values[field.id] ?? '').split(', ').includes(opt)}
+                              onChange={(e) => {
+                                const current = (values[field.id] ?? '').split(', ').filter(Boolean);
+                                const next = e.target.checked ? [...current, opt] : current.filter((c) => c !== opt);
+                                handleChange(field.id, next.join(', '));
+                              }}
+                            />
+                            <label htmlFor={`${field.id}-chk-${i}`} className="text-sm">
+                              {opt}
+                            </label>
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    ) : field.type === 'radio' ? (
+                      <div className="flex flex-col gap-1">
+                        {field.options?.filter(Boolean).map((opt: string, i: number) => (
+                          <React.Fragment key={`${field.id}-${i}`}>
+                            <input
+                              type="radio"
+                              id={`${field.id}-rad-${i}`}
+                              name={field.id}
+                              value={opt}
+                              required={field.isRequired ?? field.required}
+                              checked={values[field.id] === opt}
+                              onChange={(e) => handleChange(field.id, e.target.value)}
+                            />
+                            <label htmlFor={`${field.id}-rad-${i}`} className="text-sm">
+                              {opt}
+                            </label>
+                          </React.Fragment>
+                        ))}
+                      </div>
                   ) : (
                     <input
                       type={field.type === 'number' ? 'number' : field.type}
