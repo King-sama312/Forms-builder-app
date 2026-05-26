@@ -2,7 +2,7 @@ import { defineConfig } from "tsup";
 
 export default defineConfig({
   entry: ["./src/index.ts"],
-  noExternal: [], // transpile workspace packages and their dependencies
+  noExternal: ['@repo/*'], // bundle workspace packages
   splitting: false,
   bundle: true,
   outDir: "./dist",
