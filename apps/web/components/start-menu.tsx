@@ -10,7 +10,7 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
   const router = useRouter();
   const { user } = useGetUserInfo();
   const { signOutAsync } = useSignOut();
-  const { openWindow } = useWindowManager();
+  const { openWindow, closeWindow } = useWindowManager();
 
   const handleClick = (href: string) => {
     router.push(href);
@@ -31,7 +31,7 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
       'tips-dialog',
       'Welcome to Forms Builder 98',
       <div className="flex flex-col h-full">
-        <TipsDialog />
+        <TipsDialog onClose={() => closeWindow('tips-dialog')} />
       </div>,
       { x: 200, y: 120, width: 420, height: 260 },
     );

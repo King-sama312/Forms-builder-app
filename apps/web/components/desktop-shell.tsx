@@ -21,7 +21,7 @@ export function DesktopShell({ children }: { children: ReactNode }) {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [resetCounter, setResetCounter] = useState(0);
   const pathname = usePathname();
-  const { openWindow } = useWindowManager();
+  const { openWindow, closeWindow } = useWindowManager();
   const { wallpaper, colorScheme, customWallpaper } = useSettingsStore();
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function DesktopShell({ children }: { children: ReactNode }) {
         'tips-dialog',
         'Welcome to Forms Builder 98',
         <div className="flex flex-col h-full">
-          <TipsDialog />
+          <TipsDialog onClose={() => closeWindow('tips-dialog')} />
         </div>,
         { x: 200, y: 120, width: 420, height: 260 },
       );
