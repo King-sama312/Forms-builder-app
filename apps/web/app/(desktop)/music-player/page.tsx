@@ -1,17 +1,22 @@
 'use client';
 
-import { Win98Window } from '~/components/win98-window';
+import { useEffect } from 'react';
 import { MusicPlayer } from '~/components/music-player';
+import { useWindowManager } from '~/components/windows-context';
 
 export default function MusicPlayerPage() {
-  return (
-    <Win98Window
-      title="Music Player"
-      defaultPosition={{ x: 200, y: 120, width: 400, height: 380 }}
-    >
+  const { openWindow } = useWindowManager();
+
+  useEffect(() => {
+    openWindow(
+      'music-player',
+      'Music Player',
       <div className="flex flex-col h-full">
         <MusicPlayer />
-      </div>
-    </Win98Window>
-  );
+      </div>,
+      { x: 200, y: 120, width: 400, height: 380 },
+    );
+  }, [openWindow]);
+
+  return null;
 }

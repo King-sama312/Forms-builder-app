@@ -1,5 +1,6 @@
 import { DesktopShell } from '~/components/desktop-shell';
 import { Clippy } from '~/components/clippy';
+import { WindowManagerProvider } from '~/components/windows-context';
 
 export default function DesktopLayout({
   children,
@@ -7,9 +8,11 @@ export default function DesktopLayout({
   children: React.ReactNode;
 }) {
   return (
-    <DesktopShell>
-      {children}
-      <Clippy />
-    </DesktopShell>
+    <WindowManagerProvider>
+      <DesktopShell>
+        {children}
+        <Clippy />
+      </DesktopShell>
+    </WindowManagerProvider>
   );
 }

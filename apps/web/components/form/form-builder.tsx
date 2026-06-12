@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Win98Window } from '~/components/win98-window';
 import { FormFieldEditor } from './form-field-editor';
 import {
   useGetFormById,
@@ -53,46 +52,39 @@ export function FormBuilder({ formId }: { formId: string }) {
   const isLoading = formLoading || fieldsLoading;
 
   return (
-    <Win98Window
-      title={form ? `Form Builder - ${form.title}` : 'Form Builder'}
-      defaultPosition={{ x: 60, y: 40, width: 640, height: 480 }}
-    >
-      <div className="flex flex-col h-full">
-        {/* Menu bar */}
-        <div className="flex items-center gap-1 mb-2 pb-1 border-b border-[#808080]">
-          <button onClick={() => router.push('/forms')}>📁 Forms</button>
-          <button onClick={save} disabled={isSaving || isLoading}>
-            💾 {isSaving ? 'Saving...' : 'Save'}
-          </button>
-          <button onClick={() => router.push(`/builder/${formId}/preview`)}>
-            👁 Preview
-          </button>
-          <button onClick={() => router.push(`/builder/${formId}/submissions`)}>
-            📊 Submissions
-          </button>
-          <button onClick={() => router.push(`/builder/${formId}/analytics`)}>
-            📈 Analytics
-          </button>
-          <div className="flex-1" />
-          <button onClick={copyShareLink}>
-            {copied ? '✅ Copied!' : '🔗 Share'}
-          </button>
-        </div>
-
-        {isLoading ? (
-          <div className="flex-1 flex items-center justify-center">
-            <p className="text-sm">Loading form data...</p>
-          </div>
-        ) : (
-          <FormFieldEditor formId={formId} />
-        )}
-
-        {/* Status bar */}
-        <div className="mt-2 pt-1 border-t border-[#808080] text-xs flex justify-between">
-          <span>{localFields.length} field(s)</span>
-          <span>{form?.description || ''}</span>
-        </div>
+    <div className="flex flex-col h-full">
+      <div className="flex items-center gap-1 mb-2 pb-1 border-b border-[#808080]">
+        <button onClick={() => router.push('/forms')}>📁 Forms</button>
+        <button onClick={save} disabled={isSaving || isLoading}>
+          💾 {isSaving ? 'Saving...' : 'Save'}
+        </button>
+        <button onClick={() => router.push(`/builder/${formId}/preview`)}>
+          👁 Preview
+        </button>
+        <button onClick={() => router.push(`/builder/${formId}/submissions`)}>
+          📊 Submissions
+        </button>
+        <button onClick={() => router.push(`/builder/${formId}/analytics`)}>
+          📈 Analytics
+        </button>
+        <div className="flex-1" />
+        <button onClick={copyShareLink}>
+          {copied ? '✅ Copied!' : '🔗 Share'}
+        </button>
       </div>
-    </Win98Window>
+
+      {isLoading ? (
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-sm">Loading form data...</p>
+        </div>
+      ) : (
+        <FormFieldEditor formId={formId} />
+      )}
+
+      <div className="mt-2 pt-1 border-t border-[#808080] text-xs flex justify-between">
+        <span>{localFields.length} field(s)</span>
+        <span>{form?.description || ''}</span>
+      </div>
+    </div>
   );
 }

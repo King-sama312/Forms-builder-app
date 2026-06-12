@@ -1,11 +1,24 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { FormBuilder } from '~/components/form/form-builder';
+import { useWindowManager } from '~/components/windows-context';
 
 export default function BuilderPage() {
   const params = useParams();
   const formId = params.formId as string;
+  const { openWindow } = useWindowManager();
+
+  useEffect(() => {
+    if (!formId) return;
+    openWindow(
+      `builder-${formId}`,
+      'Form Builder',
+      <FormBuilder formId={formId} />,
+      { x: 80, y: 50, width: 700, height: 500 },
+    );
+  }, [formId, openWindow]);
 
   if (!formId) {
     return (
@@ -15,5 +28,5 @@ export default function BuilderPage() {
     );
   }
 
-  return <FormBuilder formId={formId} />;
+  return null;
 }

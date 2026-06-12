@@ -1,18 +1,33 @@
 'use client';
 
 import { Rnd } from 'react-rnd';
-import { useRouter, usePathname } from 'next/navigation';
 import { useCallback, useState, useEffect, useRef } from 'react';
-import { useWindows } from '~/components/windows-context';
+
+interface Position {
+  x: number;
+  y: number;
+}
+
+interface Size {
+  width: number;
+  height: number;
+}
 
 interface Win98WindowProps {
   title: string;
   children: React.ReactNode;
-  defaultPosition?: { x: number; y: number; width: number; height: number };
+  defaultPosition: Position & Size;
   onClose?: () => void;
+  onMinimize: () => void;
+  onMaximize: () => void;
+  onFocus: () => void;
+  onDragStop: (pos: Position) => void;
+  onResizeStop: (size: Size, pos: Position) => void;
   noClose?: boolean;
-  fixed?: boolean;
-  windowId?: string;
+  zIndex: number;
+  isMinimized: boolean;
+  isMaximized: boolean;
+  isActive: boolean;
 }
 
 const TASKBAR_HEIGHT = 28;
@@ -20,103 +35,95 @@ const TASKBAR_HEIGHT = 28;
 export function Win98Window({
   title,
   children,
-  defaultPosition = { x: 120, y: 100, width: 500, height: 350 },
+  defaultPosition,
   onClose,
+  onMinimize,
+  onMaximize,
+  onFocus,
+  onDragStop,
+  onResizeStop,
   noClose = false,
-  fixed = false,
-  windowId,
+  zIndex,
+  isMinimized,
+  isMaximized,
+  isActive,
 }: Win98WindowProps) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const { minimizeWindow, isMinimized, registerWindow, unregisterWindow, setWindowMaximized } = useWindows();
-  const windowIdRef = useRef<string>(windowId ?? Math.random().toString(36).substr(2, 9));
-
-  const [windowState, setWindowState] = useState<'normal' | 'maximized'>('normal');
   const [position, setPosition] = useState({ x: defaultPosition.x, y: defaultPosition.y });
   const [size, setSize] = useState({ width: defaultPosition.width, height: defaultPosition.height });
-  const prevRef = useRef({ x: defaultPosition.x, y: defaultPosition.y, width: defaultPosition.width, height: defaultPosition.height });
+  const prevRef = useRef({
+    x: defaultPosition.x,
+    y: defaultPosition.y,
+    width: defaultPosition.width,
+    height: defaultPosition.height,
+  });
+  const [maximized, setMaximized] = useState(false);
 
   useEffect(() => {
-    registerWindow(windowIdRef.current, title, pathname);
-    // No cleanup — windows persist in the taskbar until explicitly closed
-  }, [title, pathname]);
-
-  const handleClose = useCallback(() => {
-    unregisterWindow(windowIdRef.current);
-    if (onClose) {
-      onClose();
-    } else {
-      router.push('/');
-    }
-  }, [onClose, router, unregisterWindow]);
-
-  const handleMinimize = useCallback(() => {
-    minimizeWindow(windowIdRef.current);
-  }, [minimizeWindow]);
-
-  const handleMaximize = useCallback(() => {
-    if (windowState === 'maximized') {
-      setWindowState('normal');
-      setPosition({ x: prevRef.current.x, y: prevRef.current.y });
-      setSize({ width: prevRef.current.width, height: prevRef.current.height });
-      setWindowMaximized(windowIdRef.current, false);
-    } else {
+    if (isMaximized && !maximized) {
       prevRef.current = { x: position.x, y: position.y, width: size.width, height: size.height };
-      setWindowState('maximized');
+      setMaximized(true);
       setPosition({ x: 0, y: 0 });
       setSize({ width: window.innerWidth, height: window.innerHeight - TASKBAR_HEIGHT });
-      setWindowMaximized(windowIdRef.current, true);
+    } else if (!isMaximized && maximized) {
+      setMaximized(false);
+      setPosition({ x: prevRef.current.x, y: prevRef.current.y });
+      setSize({ width: prevRef.current.width, height: prevRef.current.height });
     }
-  }, [windowState, position, size, setWindowMaximized]);
+  }, [isMaximized, maximized, position, size]);
 
-  const handleDragStop = useCallback((_e: any, d: { x: number; y: number }) => {
-    setPosition({ x: d.x, y: d.y });
-  }, []);
+  const handleDragStop = useCallback(
+    (_e: any, d: { x: number; y: number }) => {
+      setPosition({ x: d.x, y: d.y });
+      onDragStop({ x: d.x, y: d.y });
+    },
+    [onDragStop],
+  );
 
-  const handleResizeStop = useCallback((_e: any, _dir: any, ref: HTMLElement, _delta: any, pos: { x: number; y: number }) => {
-    setSize({ width: ref.offsetWidth, height: ref.offsetHeight });
-    setPosition({ x: pos.x, y: pos.y });
-  }, []);
-
-  const minimized = isMinimized(windowIdRef.current);
-  const isMaximized = windowState === 'maximized';
-
-  if (minimized) return null;
+  const handleResizeStop = useCallback(
+    (_e: any, _dir: any, ref: HTMLElement, _delta: any, pos: { x: number; y: number }) => {
+      const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
+      setSize(newSize);
+      onResizeStop(newSize, { x: pos.x, y: pos.y });
+    },
+    [onResizeStop],
+  );
 
   return (
-    <Rnd
-      position={{ x: position.x, y: position.y }}
-      size={{ width: size.width, height: size.height }}
-      dragHandleClassName="title-bar"
-      minWidth={300}
-      minHeight={200}
-      onDragStop={handleDragStop}
-      onResizeStop={handleResizeStop}
-      disableDragging={isMaximized}
-      enableResizing={!isMaximized}
-      bounds={fixed ? 'window' : 'parent'}
-      style={{ position: fixed ? 'fixed' : 'absolute', zIndex: 50 }}
+    <div
+      style={{
+        display: isMinimized ? 'none' : 'block',
+        pointerEvents: 'auto',
+        position: 'absolute',
+        zIndex,
+      }}
+      onMouseDown={onFocus}
     >
-      <div className="window flex flex-col w-full h-full bg-[#c0c0c0]">
-        <div className="title-bar">
-          <div className="title-bar-text">
-            {title}
+      <Rnd
+        position={{ x: position.x, y: position.y }}
+        size={{ width: size.width, height: size.height }}
+        dragHandleClassName="title-bar"
+        minWidth={300}
+        minHeight={200}
+        onDragStop={handleDragStop}
+        onResizeStop={handleResizeStop}
+        disableDragging={maximized}
+        enableResizing={!maximized}
+      >
+        <div className="window flex flex-col w-full h-full bg-[#c0c0c0]">
+          <div className="title-bar" style={{ background: isActive ? undefined : '#808080' }}>
+            <div className="title-bar-text">{title}</div>
+            <div className="title-bar-controls">
+              <button aria-label="Minimize" onClick={onMinimize} />
+              <button
+                aria-label={isMaximized ? 'Restore' : 'Maximize'}
+                onClick={onMaximize}
+              />
+              {!noClose && <button aria-label="Close" onClick={onClose} />}
+            </div>
           </div>
-          <div className="title-bar-controls">
-            <button aria-label="Minimize" onClick={handleMinimize} />
-            <button
-              aria-label={isMaximized ? 'Restore' : 'Maximize'}
-              onClick={handleMaximize}
-            />
-            {!noClose && (
-              <button aria-label="Close" onClick={handleClose} />
-            )}
-          </div>
+          <div className="window-body flex-1 overflow-auto p-3">{children}</div>
         </div>
-        <div className="window-body flex-1 overflow-auto p-3">
-          {children}
-        </div>
-      </div>
-    </Rnd>
+      </Rnd>
+    </div>
   );
 }

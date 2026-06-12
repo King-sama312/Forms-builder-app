@@ -1,25 +1,17 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
 import { StartMenu } from './start-menu';
 import { useGetUserInfo } from '~/hooks/api/auth/index';
-import { useWindows } from '~/components/windows-context';
+import { useWindowManager } from '~/components/windows-context';
 
 export function Taskbar({ onShutdown }: { onShutdown?: () => void }) {
-  const router = useRouter();
-  const currentPathname = usePathname();
   const [startOpen, setStartOpen] = useState(false);
   const { user } = useGetUserInfo();
-  const { windows, restoreWindow } = useWindows();
+  const { windows, focusWindow } = useWindowManager();
 
-  const handleWindowClick = (id: string, pathname: string, minimized: boolean) => {
-    if (minimized) {
-      restoreWindow(id);
-    }
-    if (pathname !== currentPathname) {
-      router.push(pathname);
-    }
+  const handleWindowClick = (id: string) => {
+    focusWindow(id);
   };
 
   return (
@@ -75,8 +67,8 @@ export function Taskbar({ onShutdown }: { onShutdown?: () => void }) {
           {windows.map(w => (
             <TaskbarItem
               key={w.id}
-              active={w.pathname === currentPathname && !w.minimized}
-              onClick={() => handleWindowClick(w.id, w.pathname, w.minimized)}
+              active={w.state !== 'minimized'}
+              onClick={() => handleWindowClick(w.id)}
             >
               {w.title}
             </TaskbarItem>
