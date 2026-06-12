@@ -1,3 +1,7 @@
+Demo Credentials:
+email: guest@gmail.com
+pass: 12345678
+
 # Turborepo starter
 
 This Turborepo starter is maintained by the Turborepo core team.
