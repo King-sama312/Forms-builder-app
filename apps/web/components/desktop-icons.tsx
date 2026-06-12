@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef, useMemo } from 'react';
+import { useState, useCallback, useRef, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetUserInfo } from '~/hooks/api/auth/index';
 import { useWindowManager } from './windows-context';
@@ -53,15 +53,26 @@ function clampToViewport(pos: Position): Position {
 }
 
 function defaultPosition(index: number, total: number): Position {
-  const isLast = index === total - 1;
+  const inSecondColumn = index >= total - 2;
+  if (inSecondColumn) {
+    const colIndex = index - (total - 2);
+    return {
+      x: snap(INITIAL_X + SNAP),
+      y: snap(INITIAL_Y + colIndex * SNAP),
+    };
+  }
   return {
-    x: snap(isLast ? INITIAL_X + SNAP : INITIAL_X),
-    y: snap(isLast ? INITIAL_Y : INITIAL_Y + index * SNAP),
+    x: snap(INITIAL_X),
+    y: snap(INITIAL_Y + index * SNAP),
   };
 }
 
-function useIconPositions(iconKeys: string[]) {
+function useIconPositions(iconKeys: string[], resetKey?: number) {
   const [saved, setSaved] = useState<Record<string, Position>>({});
+
+  useEffect(() => {
+    setSaved({});
+  }, [resetKey]);
 
   const positions = useMemo(() => {
     const result: Record<string, Position> = {};
@@ -176,7 +187,7 @@ function DragIcon({
   );
 }
 
-export function DesktopIcons({ onTriggerBsod }: { onTriggerBsod?: () => void }) {
+export function DesktopIcons({ onTriggerBsod, resetCounter }: { onTriggerBsod?: () => void; resetCounter?: number }) {
   const router = useRouter();
   const { user } = useGetUserInfo();
   const { openWindow } = useWindowManager();
@@ -208,12 +219,13 @@ export function DesktopIcons({ onTriggerBsod }: { onTriggerBsod?: () => void }) 
     { label: 'Music Player', icon: <img src="/icons/music.png" alt="Music Player" className="w-full h-full pixel-art" draggable={false} />, onClick: () => router.push('/music-player') },
     { label: 'Scary Shortcut', icon: <div className="w-full h-full flex items-center justify-center text-3xl">💀</div>, onClick: () => onTriggerBsod?.() },
     { label: 'Display', icon: <div className="w-full h-full flex items-center justify-center text-3xl">🖥️</div>, onClick: () => handleDisplayProps() },
+    { label: 'Notepad', icon: <div className="w-full h-full flex items-center justify-center text-3xl">📝</div>, onClick: () => router.push('/notepad') },
   ] as const;
 
   const allIconDefs = [...(user ? authedIcons : guestIcons), ...commonIcons];
 
   const keys = allIconDefs.map(d => d.label);
-  const { positions, updatePosition } = useIconPositions(keys);
+  const { positions, updatePosition } = useIconPositions(keys, resetCounter);
 
   return (
     <div className="absolute inset-0 z-0">

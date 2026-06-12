@@ -8,6 +8,7 @@ import { ShutdownScreen } from './shutdown-screen';
 import { WindowManager } from './window-manager';
 import { BsodScreen } from './bsod-screen';
 import { TipsDialog, shouldShowTipsOnStartup } from './tips-dialog';
+import { DesktopContextMenu } from './desktop-context-menu';
 import { useWindowManager } from './windows-context';
 import { useSettingsStore } from '~/store/settings-store';
 import { getWallpaperStyle, applyColorScheme } from '~/lib/theme-config';
@@ -17,6 +18,8 @@ export function DesktopShell({ children }: { children: ReactNode }) {
   const [shuttingDown, setShuttingDown] = useState(false);
   const [showBsod, setShowBsod] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [resetCounter, setResetCounter] = useState(0);
   const pathname = usePathname();
   const { openWindow } = useWindowManager();
   const { wallpaper, colorScheme, customWallpaper } = useSettingsStore();
@@ -51,6 +54,19 @@ export function DesktopShell({ children }: { children: ReactNode }) {
     setShowBsod(true);
   }, []);
 
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenu({ x: e.clientX, y: e.clientY });
+  }, []);
+
+  const handleCloseContextMenu = useCallback(() => {
+    setContextMenu(null);
+  }, []);
+
+  const handleAutoArrange = useCallback(() => {
+    setResetCounter(c => c + 1);
+  }, []);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.altKey && e.key === 'n') {
@@ -76,13 +92,25 @@ export function DesktopShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <div className="win98-desktop relative w-screen h-screen overflow-hidden" style={wallpaperStyle}>
+      <div
+        className="win98-desktop relative w-screen h-screen overflow-hidden"
+        style={wallpaperStyle}
+        onContextMenu={handleContextMenu}
+      >
         <div className="relative w-full h-[calc(100vh-28px)]">
-          <DesktopIcons onTriggerBsod={handleTriggerBsod} />
+          <DesktopIcons onTriggerBsod={handleTriggerBsod} resetCounter={resetCounter} />
           {children}
           <WindowManager />
         </div>
       </div>
+      {contextMenu && (
+        <DesktopContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={handleCloseContextMenu}
+          onAutoArrange={handleAutoArrange}
+        />
+      )}
       <Taskbar onShutdown={() => setShuttingDown(true)} />
       {showBsod && <BsodScreen onDismiss={handleBsodDismiss} />}
     </>

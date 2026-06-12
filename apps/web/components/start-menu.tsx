@@ -63,44 +63,39 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
         </div>
         <div className="flex-1 py-1">
           <MenuItem onClick={() => handleClick('/forms')}>
-            <span className="w-6 h-6 flex items-center justify-center shrink-0">📋</span>
             My Forms
           </MenuItem>
           <div className="border-t border-[#808080] my-1 mx-2" />
           {!user ? (
             <>
               <MenuItem onClick={() => handleClick('/login')}>
-                <span className="w-6 h-6 flex items-center justify-center shrink-0">🔑</span>
                 Login
               </MenuItem>
               <MenuItem onClick={() => handleClick('/signup')}>
-                <span className="w-6 h-6 flex items-center justify-center shrink-0">📝</span>
                 Register
               </MenuItem>
             </>
           ) : (
             <>
               <MenuItem onClick={() => handleClick('/scan-disk')}>
-                <span className="w-6 h-6 flex items-center justify-center shrink-0">💾</span>
                 ScanDisk
               </MenuItem>
+              <MenuItem onClick={() => handleClick('/notepad')}>
+                Notepad
+              </MenuItem>
               <MenuItem onClick={handleOpenDisplay}>
-                <span className="w-6 h-6 flex items-center justify-center shrink-0">🎨</span>
                 Display Properties
               </MenuItem>
               <MenuItem onClick={handleOpenTips}>
-                <span className="w-6 h-6 flex items-center justify-center shrink-0">💡</span>
                 Tips & Tricks
               </MenuItem>
               <MenuItem onClick={handleSignOut}>
-                <span className="w-6 h-6 flex items-center justify-center shrink-0">🚪</span>
                 Log Off {user.email ? `(${user.email.split('@')[0]})` : ''}
               </MenuItem>
             </>
           )}
           <div className="border-t border-[#808080] my-1 mx-2" />
           <MenuItem onClick={() => { onShutdown?.(); onClose(); }}>
-            <span className="w-6 h-6 flex items-center justify-center shrink-0">🖥️</span>
             Shut Down
           </MenuItem>
         </div>
@@ -119,3 +114,5 @@ function MenuItem({ children, onClick }: { children: React.ReactNode; onClick: (
     </button>
   );
 }
+
+
