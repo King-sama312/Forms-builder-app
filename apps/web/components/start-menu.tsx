@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useGetUserInfo, useSignOut } from '~/hooks/api/auth/index';
 import { useWindowManager } from './windows-context';
 import { TipsDialog } from './tips-dialog';
+import { DisplayProperties } from './display-properties';
 
 export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShutdown?: () => void }) {
   const router = useRouter();
@@ -33,6 +34,18 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
         <TipsDialog />
       </div>,
       { x: 200, y: 120, width: 420, height: 260 },
+    );
+  };
+
+  const handleOpenDisplay = () => {
+    onClose();
+    openWindow(
+      'display-properties',
+      'Display Properties',
+      <div className="flex flex-col h-full">
+        <DisplayProperties />
+      </div>,
+      { x: 100, y: 60, width: 560, height: 420 },
     );
   };
 
@@ -70,6 +83,10 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
               <MenuItem onClick={() => handleClick('/scan-disk')}>
                 <span className="w-6 h-6 flex items-center justify-center shrink-0">💾</span>
                 ScanDisk
+              </MenuItem>
+              <MenuItem onClick={handleOpenDisplay}>
+                <span className="w-6 h-6 flex items-center justify-center shrink-0">🎨</span>
+                Display Properties
               </MenuItem>
               <MenuItem onClick={handleOpenTips}>
                 <span className="w-6 h-6 flex items-center justify-center shrink-0">💡</span>

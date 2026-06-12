@@ -9,13 +9,26 @@ import { WindowManager } from './window-manager';
 import { BsodScreen } from './bsod-screen';
 import { TipsDialog, shouldShowTipsOnStartup } from './tips-dialog';
 import { useWindowManager } from './windows-context';
+import { useSettingsStore } from '~/store/settings-store';
+import { getWallpaperStyle, applyColorScheme } from '~/lib/theme-config';
 
 export function DesktopShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [shuttingDown, setShuttingDown] = useState(false);
   const [showBsod, setShowBsod] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { openWindow } = useWindowManager();
+  const { wallpaper, colorScheme, customWallpaper } = useSettingsStore();
+
+  useEffect(() => {
+    setMounted(true);
+    applyColorScheme(colorScheme);
+  }, [colorScheme]);
+
+  const wallpaperStyle = mounted
+    ? getWallpaperStyle(wallpaper, customWallpaper)
+    : { backgroundColor: '#008080' };
 
   useEffect(() => {
     if (shouldShowTipsOnStartup()) {
@@ -63,7 +76,7 @@ export function DesktopShell({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <div className="win98-desktop relative w-screen h-screen overflow-hidden">
+      <div className="win98-desktop relative w-screen h-screen overflow-hidden" style={wallpaperStyle}>
         <div className="relative w-full h-[calc(100vh-28px)]">
           <DesktopIcons onTriggerBsod={handleTriggerBsod} />
           {children}

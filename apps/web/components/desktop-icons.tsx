@@ -3,6 +3,8 @@
 import { useState, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetUserInfo } from '~/hooks/api/auth/index';
+import { useWindowManager } from './windows-context';
+import { DisplayProperties } from './display-properties';
 
 const SNAP = 96;
 const ICON_WIDTH = 82;
@@ -177,6 +179,18 @@ function DragIcon({
 export function DesktopIcons({ onTriggerBsod }: { onTriggerBsod?: () => void }) {
   const router = useRouter();
   const { user } = useGetUserInfo();
+  const { openWindow } = useWindowManager();
+
+  const handleDisplayProps = useCallback(() => {
+    openWindow(
+      'display-properties',
+      'Display Properties',
+      <div className="flex flex-col h-full">
+        <DisplayProperties />
+      </div>,
+      { x: 100, y: 60, width: 560, height: 420 },
+    );
+  }, [openWindow]);
 
   const authedIcons = [
     { label: 'My Forms', icon: <img src="/icons/forms.png" alt="My Forms" className="w-full h-full pixel-art" draggable={false} />, onClick: () => router.push('/forms') },
@@ -193,6 +207,7 @@ export function DesktopIcons({ onTriggerBsod }: { onTriggerBsod?: () => void }) 
   const commonIcons = [
     { label: 'Music Player', icon: <img src="/icons/music.png" alt="Music Player" className="w-full h-full pixel-art" draggable={false} />, onClick: () => router.push('/music-player') },
     { label: 'Scary Shortcut', icon: <div className="w-full h-full flex items-center justify-center text-3xl">💀</div>, onClick: () => onTriggerBsod?.() },
+    { label: 'Display', icon: <div className="w-full h-full flex items-center justify-center text-3xl">🖥️</div>, onClick: () => handleDisplayProps() },
   ] as const;
 
   const allIconDefs = [...(user ? authedIcons : guestIcons), ...commonIcons];
