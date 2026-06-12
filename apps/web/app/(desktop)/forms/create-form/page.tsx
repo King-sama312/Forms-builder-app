@@ -60,7 +60,7 @@ function CreateFormWindowContent() {
       )}
 
       <div className="field-row justify-end gap-2 mt-auto">
-        <button type="button" onClick={() => router.push('/forms')}>
+        <button type="button" onClick={() => router.push('/')}>
           Cancel
         </button>
         <button type="submit" disabled={isPending}>
@@ -78,7 +78,7 @@ export default function CreateFormPage() {
   useEffect(() => {
     openWindow('create-form', 'Create New Form', <CreateFormWindowContent />, {
       x: 160, y: 100, width: 420, height: 300,
-    }, () => router.push('/forms'));
+    }, () => router.push('/'));
   }, [openWindow, router]);
 
   return null;

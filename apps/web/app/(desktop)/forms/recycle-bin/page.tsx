@@ -24,7 +24,7 @@ export default function RecycleBinPage() {
   const { openWindow } = useWindowManager();
 
   useEffect(() => {
-    openWindow('recycle-bin', 'Recycle Bin', <RecycleBinWindowContent />, { x: 100, y: 80, width: 520, height: 380 }, () => router.push('/forms'));
+    openWindow('recycle-bin', 'Recycle Bin', <RecycleBinWindowContent />, { x: 100, y: 80, width: 520, height: 380 }, () => router.push('/'));
   }, [openWindow, router]);
 
   return null;

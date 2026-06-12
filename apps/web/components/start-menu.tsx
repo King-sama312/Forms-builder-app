@@ -51,7 +51,7 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
 
   return (
     <div
-      className="fixed bottom-[28px] left-0 w-52 bg-[#c0c0c0] border-2 z-99"
+      className="fixed bottom-[28px] left-0 w-52 bg-[#c0c0c0] border-2 z-[10001]"
       style={{ borderStyle: 'outset' }}
       onMouseLeave={onClose}
     >
