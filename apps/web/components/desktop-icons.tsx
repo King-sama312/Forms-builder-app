@@ -34,7 +34,7 @@ function resolveCollision(
     for (let dy = -ring; dy <= ring; dy++) {
       for (let dx = -ring; dx <= ring; dx++) {
         if (Math.abs(dx) !== ring && Math.abs(dy) !== ring) continue;
-        const candidate: Position = { x: target.x + dx * SNAP, y: target.y + dy * SNAP };
+        const candidate: Position = clampToViewport({ x: target.x + dx * SNAP, y: target.y + dy * SNAP });
         const key = posKey(candidate);
         if (!occupied.has(key)) return candidate;
       }
