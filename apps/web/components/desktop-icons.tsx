@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGetUserInfo } from '~/hooks/api/auth/index';
 
-const STORAGE_KEY = 'desktop-icon-positions';
-const SNAP = 80;
+const SNAP = 96;
 const ICON_WIDTH = 82;
 const ICON_HEIGHT = 90;
 const INITIAL_X = 16;
@@ -20,22 +19,6 @@ function snap(v: number): number {
   return Math.round(v / SNAP) * SNAP;
 }
 
-function loadPositions(): Record<string, Position> {
-  if (typeof window === 'undefined') return {};
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, Position>) : {};
-  } catch {
-    return {};
-  }
-}
-
-function savePositions(positions: Record<string, Position>) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(positions));
-  } catch {}
-}
-
 function posKey(p: Position): string {
   return `${p.x},${p.y}`;
 }
@@ -43,7 +26,6 @@ function posKey(p: Position): string {
 function resolveCollision(
   target: Position,
   occupied: Set<string>,
-  exclude: string,
 ): Position {
   if (!occupied.has(posKey(target))) return target;
   for (let ring = 1; ring < 50; ring++) {
@@ -68,44 +50,46 @@ function clampToViewport(pos: Position): Position {
   };
 }
 
+function defaultPosition(index: number, total: number): Position {
+  const isLast = index === total - 1;
+  return {
+    x: snap(isLast ? INITIAL_X + SNAP : INITIAL_X),
+    y: snap(isLast ? INITIAL_Y : INITIAL_Y + index * SNAP),
+  };
+}
+
 function useIconPositions(iconKeys: string[]) {
-  const [positions, setPositions] = useState<Record<string, Position>>(() => {
-    const saved = loadPositions();
+  const [saved, setSaved] = useState<Record<string, Position>>({});
+
+  const positions = useMemo(() => {
     const result: Record<string, Position> = {};
     const occupied = new Set<string>();
-    let col = 0;
-    let row = 0;
-    for (const key of iconKeys) {
+    for (let i = 0; i < iconKeys.length; i++) {
+      const key = iconKeys[i] as string;
+      const savedPos = saved[key];
       let pos: Position;
-      if (saved[key]) {
-        pos = { x: snap(saved[key].x), y: snap(saved[key].y) };
+      if (savedPos) {
+        pos = { x: snap(savedPos.x), y: snap(savedPos.y) };
       } else {
-        pos = { x: snap(INITIAL_X + col * (ICON_WIDTH + 32)), y: snap(INITIAL_Y + row * (ICON_HEIGHT + 24)) };
+        pos = defaultPosition(i, iconKeys.length);
       }
       pos = clampToViewport(pos);
-      pos = resolveCollision(pos, occupied, key);
+      pos = clampToViewport(resolveCollision(pos, occupied));
       result[key] = pos;
       occupied.add(posKey(pos));
-      col++;
-      if (col >= 2) {
-        col = 0;
-        row++;
-      }
     }
     return result;
-  });
+  }, [iconKeys, saved]);
 
   const updatePosition = useCallback((label: string, pos: Position) => {
-    setPositions(prev => {
+    const clamped = clampToViewport(pos);
+    setSaved(prev => {
       const occupied = new Set<string>();
       for (const [k, v] of Object.entries(prev)) {
         if (k !== label) occupied.add(posKey(v));
       }
-      const clamped = clampToViewport(pos);
-      const resolved = resolveCollision(clamped, occupied, label);
-      const next = { ...prev, [label]: resolved };
-      savePositions(next);
-      return next;
+      const resolved = clampToViewport(resolveCollision(clamped, occupied));
+      return { ...prev, [label]: resolved };
     });
   }, []);
 
@@ -153,10 +137,10 @@ function DragIcon({
           dragRef.current.dragging = true;
         }
         if (dragRef.current.dragging) {
-          onMove(label, {
+          onMove(label, clampToViewport({
             x: snap(dragRef.current.iconX + dx),
             y: snap(dragRef.current.iconY + dy),
-          });
+          }));
         }
       };
 
