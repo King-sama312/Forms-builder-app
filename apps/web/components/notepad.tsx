@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, forwardRef, useImperativeHandle } from 'react';
 
 type MenuKey = 'file' | 'edit' | 'format' | null;
 
@@ -10,7 +10,11 @@ interface MenuAction {
   disabled?: boolean;
 }
 
-export function Notepad({ onClose }: { onClose?: () => void }) {
+export interface NotepadHandle {
+  requestClose: () => void;
+}
+
+export const Notepad = forwardRef<NotepadHandle, { onClose?: () => void }>(function Notepad({ onClose }, ref) {
   const [text, setText] = useState('');
   const [filename, setFilename] = useState('Untitled');
   const [dirty, setDirty] = useState(false);
@@ -321,6 +325,10 @@ export function Notepad({ onClose }: { onClose?: () => void }) {
     } catch {}
   }, [text, pushUndo]);
 
+  useImperativeHandle(ref, () => ({
+    requestClose: () => handleExit(),
+  }), [handleExit]);
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
@@ -467,4 +475,4 @@ export function Notepad({ onClose }: { onClose?: () => void }) {
       </div>
     </div>
   );
-}
+});

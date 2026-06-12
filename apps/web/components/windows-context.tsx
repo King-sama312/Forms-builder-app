@@ -33,6 +33,8 @@ interface WindowManagerContext {
     startMaximized?: boolean,
   ) => void;
   closeWindow: (id: string) => void;
+  forceClose: (id: string) => void;
+  setCloseBlocker: (id: string, blocker: (() => boolean) | null) => void;
   minimizeWindow: (id: string) => void;
   restoreWindow: (id: string) => void;
   maximizeWindow: (id: string) => void;
@@ -53,6 +55,7 @@ export function WindowManagerProvider({ children }: { children: ReactNode }) {
   const [windows, setWindows] = useState<WindowInstance[]>([]);
   const zCounter = useRef(0);
   const closeCallbacks = useRef<Map<string, () => void>>(new Map());
+  const closeBlockers = useRef<Map<string, () => boolean>>(new Map());
 
   const openWindow = useCallback((
     id: string,
@@ -85,10 +88,29 @@ export function WindowManagerProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const setCloseBlocker = useCallback((id: string, blocker: (() => boolean) | null) => {
+    if (blocker) {
+      closeBlockers.current.set(id, blocker);
+    } else {
+      closeBlockers.current.delete(id);
+    }
+  }, []);
+
   const closeWindow = useCallback((id: string) => {
+    const blocker = closeBlockers.current.get(id);
+    if (blocker?.() === true) return;
     const cb = closeCallbacks.current.get(id);
     cb?.();
     closeCallbacks.current.delete(id);
+    closeBlockers.current.delete(id);
+    setWindows(prev => prev.filter(w => w.id !== id));
+  }, []);
+
+  const forceClose = useCallback((id: string) => {
+    const cb = closeCallbacks.current.get(id);
+    cb?.();
+    closeCallbacks.current.delete(id);
+    closeBlockers.current.delete(id);
     setWindows(prev => prev.filter(w => w.id !== id));
   }, []);
 
@@ -132,7 +154,7 @@ export function WindowManagerProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <WindowManagerContext.Provider value={{ openWindow, closeWindow, minimizeWindow, restoreWindow, maximizeWindow, focusWindow, updatePosition, updateSize, windows }}>
+    <WindowManagerContext.Provider value={{ openWindow, closeWindow, forceClose, setCloseBlocker, minimizeWindow, restoreWindow, maximizeWindow, focusWindow, updatePosition, updateSize, windows }}>
       {children}
     </WindowManagerContext.Provider>
   );
