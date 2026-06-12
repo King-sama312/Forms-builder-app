@@ -128,7 +128,7 @@ export function Win98Window({
         enableResizing={!maximized}
       >
         <div className="window flex flex-col w-full h-full bg-[#c0c0c0]">
-          <div className="title-bar" style={{ background: isActive ? undefined : '#808080' }}>
+          <div className="title-bar" style={{ background: isActive ? 'var(--title-bar-bg)' : 'var(--title-bar-bg-inactive)' }}>
             <div className="title-bar-text">{title}</div>
             <div className="title-bar-controls">
               <button aria-label="Minimize" onClick={onMinimize} />

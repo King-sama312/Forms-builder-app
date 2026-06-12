@@ -52,7 +52,12 @@ export interface ColorScheme {
 export const colorSchemes: Record<string, ColorScheme> = {
   standard: {
     label: "Standard (Default)",
-    vars: {},
+    vars: {
+      "--title-bar-bg": "#000080",
+      "--title-bar-text": "#ffffff",
+      "--title-bar-bg-inactive": "#808080",
+      "--title-bar-text-inactive": "#c0c0c0",
+    },
   },
   "high-contrast": {
     label: "High Contrast",
