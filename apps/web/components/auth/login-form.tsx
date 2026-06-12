@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSignIn } from '~/hooks/api/auth/index';
+import { useWindowManager } from '~/components/windows-context';
 
 export function LoginForm() {
   const router = useRouter();
+  const { closeWindow } = useWindowManager();
   const { signInUserWithEmailAndPassword, isError, error, isPending } = useSignIn();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,6 +18,7 @@ export function LoginForm() {
       { email, password },
       {
         onSuccess: () => {
+          closeWindow('login');
           router.push('/');
         },
       }

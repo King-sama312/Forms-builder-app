@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSignUp } from "~/hooks/api/auth/index";
+import { useWindowManager } from "~/components/windows-context";
 
 export function RegisterForm() {
   const router = useRouter();
+  const { closeWindow } = useWindowManager();
   const { createUserWithEmailAndPassword, isError, error, isPending } = useSignUp();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -22,6 +24,7 @@ export function RegisterForm() {
       { fullName, email, password },
       {
         onSuccess: () => {
+          closeWindow("signup");
           router.push("/");
         },
       },

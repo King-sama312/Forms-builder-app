@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { RegisterForm } from '~/components/auth/register-form';
 import { useWindowManager } from '~/components/windows-context';
 
@@ -16,11 +17,20 @@ function SignupWindowContent() {
 }
 
 export default function SignupPage() {
+  const router = useRouter();
   const { openWindow } = useWindowManager();
 
+  const onClose = useCallback(() => {
+    router.push('/');
+  }, [router]);
+
   useEffect(() => {
-    openWindow('signup', 'Register New User', <SignupWindowContent />, { x: 220, y: 130, width: 400, height: 300 });
-  }, [openWindow]);
+    openWindow('signup', 'Register New User', <SignupWindowContent />, { x: 220, y: 130, width: 400, height: 300 }, onClose, false);
+
+    return () => {
+      // noop
+    };
+  }, [openWindow, onClose]);
 
   return null;
 }
