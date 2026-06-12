@@ -40,11 +40,12 @@ function FormsWindowContent() {
 }
 
 export default function FormsPage() {
+  const router = useRouter();
   const { openWindow } = useWindowManager();
 
   useEffect(() => {
-    openWindow('forms', 'My Forms', <FormsWindowContent />, { x: 80, y: 60, width: 520, height: 380 });
-  }, [openWindow]);
+    openWindow('forms', 'My Forms', <FormsWindowContent />, { x: 80, y: 60, width: 520, height: 380 }, () => router.push('/'));
+  }, [openWindow, router]);
 
   return null;
 }

@@ -10,7 +10,7 @@ export function ShutdownScreen() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const url = '/win98logoff.mp3';
+    const url = '/system-sounds/win98logoff.mp3';
     try {
       const audio = new Audio(url);
       audio.volume = 0.5;

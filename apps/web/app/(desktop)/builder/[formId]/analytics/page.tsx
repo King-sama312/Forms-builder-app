@@ -55,14 +55,15 @@ function AnalyticsWindowContent({ formId }: { formId: string }) {
 export default function FormAnalyticsPage() {
   const params = useParams();
   const formId = params.formId as string;
+  const router = useRouter();
   const { openWindow } = useWindowManager();
 
   useEffect(() => {
     if (!formId) return;
     openWindow(`analytics-${formId}`, 'Analytics', <AnalyticsWindowContent formId={formId} />, {
       x: 40, y: 30, width: 860, height: 560,
-    });
-  }, [formId, openWindow]);
+    }, () => router.push(`/builder/${formId}`));
+  }, [formId, openWindow, router]);
 
   if (!formId) {
     return (

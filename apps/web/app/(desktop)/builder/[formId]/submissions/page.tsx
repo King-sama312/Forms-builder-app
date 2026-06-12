@@ -74,14 +74,15 @@ function SubmissionsWindowContent({ formId }: { formId: string }) {
 export default function SubmissionsPage() {
   const params = useParams();
   const formId = params.formId as string;
+  const router = useRouter();
   const { openWindow } = useWindowManager();
 
   useEffect(() => {
     if (!formId) return;
     openWindow(`submissions-${formId}`, 'Submissions', <SubmissionsWindowContent formId={formId} />, {
       x: 60, y: 40, width: 720, height: 480,
-    });
-  }, [formId, openWindow]);
+    }, () => router.push(`/builder/${formId}`));
+  }, [formId, openWindow, router]);
 
   if (!formId) {
     return (

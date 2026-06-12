@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FormPreview } from '~/components/form/form-preview';
 import { useWindowManager } from '~/components/windows-context';
 
 export default function PreviewPage() {
   const params = useParams();
   const formId = params.formId as string;
+  const router = useRouter();
   const { openWindow, closeWindow } = useWindowManager();
 
   useEffect(() => {
@@ -17,8 +18,9 @@ export default function PreviewPage() {
       'Form Preview',
       <FormPreview formId={formId} onClose={() => closeWindow(`preview-${formId}`)} />,
       { x: 100, y: 60, width: 640, height: 480 },
+      () => router.push(`/builder/${formId}`),
     );
-  }, [formId, openWindow, closeWindow]);
+  }, [formId, openWindow, closeWindow, router]);
 
   if (!formId) {
     return (

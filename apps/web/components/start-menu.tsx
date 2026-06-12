@@ -2,11 +2,14 @@
 
 import { useRouter } from 'next/navigation';
 import { useGetUserInfo, useSignOut } from '~/hooks/api/auth/index';
+import { useWindowManager } from './windows-context';
+import { TipsDialog } from './tips-dialog';
 
 export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShutdown?: () => void }) {
   const router = useRouter();
   const { user } = useGetUserInfo();
   const { signOutAsync } = useSignOut();
+  const { openWindow } = useWindowManager();
 
   const handleClick = (href: string) => {
     router.push(href);
@@ -21,6 +24,18 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
     window.location.href = '/login';
   };
 
+  const handleOpenTips = () => {
+    onClose();
+    openWindow(
+      'tips-dialog',
+      'Welcome to Forms Builder 98',
+      <div className="flex flex-col h-full">
+        <TipsDialog />
+      </div>,
+      { x: 200, y: 120, width: 420, height: 260 },
+    );
+  };
+
   return (
     <div
       className="fixed bottom-[28px] left-0 w-52 bg-[#c0c0c0] border-2 z-99"
@@ -28,13 +43,11 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
       onMouseLeave={onClose}
     >
       <div className="flex">
-        {/* Sidebar */}
         <div className="w-6 bg-[#000080] flex items-end justify-center pb-2">
           <span className="text-white text-xs font-bold rotate-180" style={{ writingMode: 'vertical-rl' }}>
             Windows 98
           </span>
         </div>
-
         <div className="flex-1 py-1">
           <MenuItem onClick={() => handleClick('/forms')}>
             <span className="w-6 h-6 inline-flex items-center justify-center mr-2">📋</span>
@@ -53,10 +66,20 @@ export function StartMenu({ onClose, onShutdown }: { onClose: () => void; onShut
               </MenuItem>
             </>
           ) : (
-            <MenuItem onClick={handleSignOut}>
-              <span className="w-6 h-6 inline-flex items-center justify-center mr-2">🚪</span>
-              Log Off {user.email ? `(${user.email.split('@')[0]})` : ''}
-            </MenuItem>
+            <>
+              <MenuItem onClick={() => handleClick('/scan-disk')}>
+                <span className="w-6 h-6 inline-flex items-center justify-center mr-2">💾</span>
+                ScanDisk
+              </MenuItem>
+              <MenuItem onClick={handleOpenTips}>
+                <span className="w-6 h-6 inline-flex items-center justify-center mr-2">💡</span>
+                Tips & Tricks
+              </MenuItem>
+              <MenuItem onClick={handleSignOut}>
+                <span className="w-6 h-6 inline-flex items-center justify-center mr-2">🚪</span>
+                Log Off {user.email ? `(${user.email.split('@')[0]})` : ''}
+              </MenuItem>
+            </>
           )}
           <div className="border-t border-[#808080] my-1 mx-2" />
           <MenuItem onClick={() => { onShutdown?.(); onClose(); }}>

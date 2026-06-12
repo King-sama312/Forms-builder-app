@@ -16,7 +16,7 @@ export function BootScreen({ onBootComplete, clickToStart }: BootScreenProps) {
 
   const playAudio = useCallback(() => {
     try {
-      const audio = new Audio('/win98-startup.mp3');
+      const audio = new Audio('/system-sounds/win98-startup.mp3');
       audio.volume = 0.5;
       audio.play().catch(() => {});
       audioRef.current = audio;

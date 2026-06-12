@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGetGlobalAnalytics } from '~/hooks/api/form';
 import { SummaryStatsRow } from '~/components/analytics/summary-stats-row';
 import { ChartPanel } from '~/components/analytics/chart-panel';
@@ -46,11 +47,12 @@ function GlobalAnalyticsWindowContent() {
 }
 
 export default function GlobalAnalyticsPage() {
+  const router = useRouter();
   const { openWindow } = useWindowManager();
 
   useEffect(() => {
-    openWindow('global-analytics', 'My Analytics', <GlobalAnalyticsWindowContent />, { x: 80, y: 50, width: 860, height: 560 });
-  }, [openWindow]);
+    openWindow('global-analytics', 'My Analytics', <GlobalAnalyticsWindowContent />, { x: 80, y: 50, width: 860, height: 560 }, () => router.push('/'));
+  }, [openWindow, router]);
 
   return null;
 }

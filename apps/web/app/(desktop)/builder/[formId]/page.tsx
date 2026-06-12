@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { FormBuilder } from '~/components/form/form-builder';
 import { useWindowManager } from '~/components/windows-context';
 
 export default function BuilderPage() {
   const params = useParams();
   const formId = params.formId as string;
+  const router = useRouter();
   const { openWindow } = useWindowManager();
 
   useEffect(() => {
@@ -17,8 +18,9 @@ export default function BuilderPage() {
       'Form Builder',
       <FormBuilder formId={formId} />,
       { x: 80, y: 50, width: 700, height: 500 },
+      () => router.push('/forms'),
     );
-  }, [formId, openWindow]);
+  }, [formId, openWindow, router]);
 
   if (!formId) {
     return (

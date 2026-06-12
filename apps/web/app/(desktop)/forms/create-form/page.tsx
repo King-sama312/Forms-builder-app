@@ -72,13 +72,14 @@ function CreateFormWindowContent() {
 }
 
 export default function CreateFormPage() {
+  const router = useRouter();
   const { openWindow } = useWindowManager();
 
   useEffect(() => {
     openWindow('create-form', 'Create New Form', <CreateFormWindowContent />, {
       x: 160, y: 100, width: 420, height: 300,
-    });
-  }, [openWindow]);
+    }, () => router.push('/forms'));
+  }, [openWindow, router]);
 
   return null;
 }
