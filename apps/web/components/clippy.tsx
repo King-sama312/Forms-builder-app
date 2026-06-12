@@ -423,6 +423,8 @@ export function Clippy() {
             width: 450,
             height: 500,
           },
+          undefined,
+          false,
         );
       }
     }

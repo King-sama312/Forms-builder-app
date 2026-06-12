@@ -48,15 +48,21 @@ export function Win98Window({
   isMaximized,
   isActive,
 }: Win98WindowProps) {
-  const [position, setPosition] = useState({ x: defaultPosition.x, y: defaultPosition.y });
-  const [size, setSize] = useState({ width: defaultPosition.width, height: defaultPosition.height });
+  const [position, setPosition] = useState({
+    x: isMaximized ? 0 : defaultPosition.x,
+    y: isMaximized ? 0 : defaultPosition.y,
+  });
+  const [size, setSize] = useState({
+    width: isMaximized ? window.innerWidth : defaultPosition.width,
+    height: isMaximized ? window.innerHeight - TASKBAR_HEIGHT : defaultPosition.height,
+  });
   const prevRef = useRef({
     x: defaultPosition.x,
     y: defaultPosition.y,
     width: defaultPosition.width,
     height: defaultPosition.height,
   });
-  const [maximized, setMaximized] = useState(false);
+  const [maximized, setMaximized] = useState(isMaximized);
 
   useEffect(() => {
     if (isMaximized && !maximized) {
@@ -69,11 +75,22 @@ export function Win98Window({
       setPosition({ x: prevRef.current.x, y: prevRef.current.y });
       setSize({ width: prevRef.current.width, height: prevRef.current.height });
     }
-  }, [isMaximized, maximized, position, size]);
+  }, [isMaximized, maximized]);
+
+  useEffect(() => {
+    if (!maximized) return;
+    const handleResize = () => {
+      setPosition({ x: 0, y: 0 });
+      setSize({ width: window.innerWidth, height: window.innerHeight - TASKBAR_HEIGHT });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [maximized]);
 
   const handleDragStop = useCallback(
     (_e: any, d: { x: number; y: number }) => {
       setPosition({ x: d.x, y: d.y });
+      prevRef.current = { ...prevRef.current, x: d.x, y: d.y };
       onDragStop({ x: d.x, y: d.y });
     },
     [onDragStop],
@@ -83,6 +100,7 @@ export function Win98Window({
     (_e: any, _dir: any, ref: HTMLElement, _delta: any, pos: { x: number; y: number }) => {
       const newSize = { width: ref.offsetWidth, height: ref.offsetHeight };
       setSize(newSize);
+      prevRef.current = { ...prevRef.current, ...newSize, x: pos.x, y: pos.y };
       onResizeStop(newSize, { x: pos.x, y: pos.y });
     },
     [onResizeStop],

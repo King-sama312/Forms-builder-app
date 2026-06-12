@@ -30,6 +30,7 @@ interface WindowManagerContext {
     component: React.ReactNode,
     defaults?: Partial<Size & Position>,
     onClose?: () => void,
+    startMaximized?: boolean,
   ) => void;
   closeWindow: (id: string) => void;
   minimizeWindow: (id: string) => void;
@@ -59,18 +60,20 @@ export function WindowManagerProvider({ children }: { children: ReactNode }) {
     component: React.ReactNode,
     defaults?: Partial<Size & Position>,
     onClose?: () => void,
+    startMaximized?: boolean,
   ) => {
     zCounter.current += 1;
+    const shouldMaximize = startMaximized !== false;
     setWindows(prev => {
       const existing = prev.find(w => w.id === id);
       if (existing) {
-        return prev.map(w => w.id === id ? { ...w, state: 'normal', zIndex: zCounter.current } : w);
+        return prev.map(w => w.id === id ? { ...w, state: shouldMaximize ? 'maximized' : 'normal', zIndex: zCounter.current } : w);
       }
       return [...prev, {
         id,
         title,
         component,
-        state: 'normal' as const,
+        state: shouldMaximize ? 'maximized' as const : 'normal' as const,
         prevState: 'normal' as const,
         prevSize: { width: defaults?.width ?? DEFAULT_WIDTH, height: defaults?.height ?? DEFAULT_HEIGHT },
         prevPosition: { x: defaults?.x ?? DEFAULT_X, y: defaults?.y ?? DEFAULT_Y },
